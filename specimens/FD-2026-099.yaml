@@ -1,0 +1,23 @@
+id: FD-2026-099
+slug: redirect-loop
+title: Redirect loop
+category: redirect
+severity: moderate
+tests:
+- loops
+- semantics
+tags:
+- redirect
+- loop
+- classic
+anatomy: "A 302 whose Location points back to the same URL. Every HTTP\n  stack has a redirect limit —\
+  \ RFC 7231 suggests five-ish — and this\n  specimen exists to find yours. Clients without limits discover\
+  \ a novel\n  way to hold a connection open forever while accomplishing nothing,\n  which is also a fair\
+  \ description of most meetings.\n\n  Real-world provenance: every framework upgrade that ever shipped\
+  \ a\n  trailing-slash handler fighting a canonical-URL middleware. Two\n  well-meaning redirects, one\
+  \ infinite conversation."
+signature:
+  status: 302
+  headers:
+    Location: /r/FD-2026-099
+  body: ''

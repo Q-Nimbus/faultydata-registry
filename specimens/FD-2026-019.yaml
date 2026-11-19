@@ -1,0 +1,28 @@
+id: FD-2026-019
+slug: wrong-content-type
+title: JSON body, text/plain label
+category: headers
+severity: moderate
+tests: [headers, parsing]
+anatomy: |
+  Perfectly good JSON wearing a text/plain badge — some
+    middleware rewrote the header and nobody audited it, because who
+    checks? The bytes are fine. The label is a lie. It's a filing cabinet
+    marked "invoices" that turns out to contain a perfectly organized
+    collection of... invoices. The problem is entirely bureaucratic.
+
+    And yet it separates the flock cleanly. The pedants sniff the
+    content, spot the JSON, and parse anyway — technically wrong,
+    practically right, like jaywalking to a fire escape. The literalists
+    refuse on principle and log an error that will confuse an on-call
+    engineer at 3am who will curl the endpoint, see perfectly valid JSON,
+    and begin to doubt their own eyes.
+
+    The data team, meanwhile, wonders why the "broken" feed works fine
+    in curl. It always works fine in curl. That's the entire problem
+    with curl.
+signature:
+  status: 200
+  headers:
+    Content-Type: text/plain; charset=utf-8
+tags: [headers, content-type]

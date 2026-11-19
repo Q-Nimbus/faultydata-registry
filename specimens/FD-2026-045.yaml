@@ -1,0 +1,32 @@
+id: FD-2026-045
+slug: docker-hub-rate-limit
+title: Image pull rate limit (Docker Hub, Nov 2020)
+category: status
+severity: moderate
+tests: [retry-logic]
+citation:
+  source: Docker — rate limit announcement and documentation
+  url: https://docs.docker.com/docker-hub/usage/pulls/
+  date: "2020-11-01"
+anatomy: |
+  Docker Hub announced pull limits — 100 per six hours for anonymous
+  users — and overnight every CI pipeline on Earth discovered it had
+  an anonymous user. Builds that had pulled the same base image
+  merrily for years began failing at 429 with TOOMANYREQUESTS, and the
+  industry's response, to its credit, was a collective "wait, that
+  costs money?"
+
+  The signature detail: it's not your code being limited, it's your
+  IP, shared with every CI worker, every teammate's laptop, and quite
+  possibly a thousand other NAT'd strangers you'll never meet. Your
+  budget is a commons. The commons has been grazed bare by somebody
+  else's cron job. Classic tragedy.
+
+  A flat 429 with the house JSON format. Clients that cache layers or
+  use a pull-through registry dodge it; clients that retry immediately
+  discover the limit resets in hours, not seconds — a Retry-After
+  measured in geological CI time.
+signature:
+  status: 429
+  body: '{"errors":[{"code":"TOOMANYREQUESTS","message":"You have reached your unauthenticated pull rate limit."}]}'
+tags: [real-world, rate-limit, ci]

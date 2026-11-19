@@ -1,0 +1,28 @@
+id: FD-2026-085
+slug: redirect-to-dead-end
+title: Redirect chain that ends in a 404
+category: redirect
+severity: trivial
+tests: [loops, semantics]
+anatomy: |
+  The 302 is valid, the Location is valid, the destination is a 404.
+  A redirect chain with a dead end — the signpost is perfect, it just
+  points at a hole in the ground. This happens constantly in the wild
+  wherever a service moved a resource and forgot the second hop, or
+  a marketing redirect outlived the campaign it pointed at.
+
+  Clients that follow redirects get a surprise: they asked for data,
+  followed the chain correctly, and landed on a 404 they had no hand
+  in creating. Whether the client attributes the 404 to the redirect
+  or to itself determines how the incident report reads — "target
+  not found" vs "the redirect led nowhere", which is the difference
+  between debugging and archaeology.
+
+  This specimen 302s to a path that does not exist, so the chain
+  resolves to a genuine 404 — a real one this time, not an exhibit.
+signature:
+  status: 302
+  headers:
+    Location: /r/FD-1999-001
+  body: '{"redirect":"/r/FD-1999-001","note":"the destination does not exist. that is the exhibit."}'
+tags: [redirect, chain, 404]

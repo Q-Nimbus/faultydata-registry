@@ -1,0 +1,29 @@
+id: FD-2026-055
+slug: duplicate-json-keys
+title: Duplicate keys in JSON
+category: corruption
+severity: moderate
+tests: [parsing]
+anatomy: |
+  The body contains {"id":1,"id":2,"id":3} — perfectly parseable,
+  syntactically valid, and semantically a coin flip. JSON's spec says
+  nothing about duplicates; parsers get to choose. Most take the last
+  value. Some take the first. A few throw. None of them are wrong,
+  which is exactly the problem — the spec delegates a security
+  decision to implementations.
+
+  This is a real attack vector, not just a parsing quirk: duplicate
+  keys have been used to smuggle different values past validation
+  layers that parse the same document differently — the WAF reads
+  id:1, the app reads id:3, and suddenly you're somebody else. It's
+  the parser-disagreement genre, the same family that makes HTTP
+  request smuggling possible.
+
+  Your client will parse this fine and get one of three ids. The
+  question is whether it notices, or just picks a value and carries
+  on like a man who found three doors and chose one without checking
+  the labels.
+signature:
+  status: 200
+  corrupt: dup-keys
+tags: [json, parsing, security]

@@ -1,0 +1,29 @@
+id: FD-2026-039
+slug: xml-not-json
+title: XML where JSON was promised
+category: corruption
+severity: moderate
+tests: [headers, parsing]
+anatomy: |
+  You sent Accept: application/json. The API responded
+    application/xml — the content negotiation silently fell through to
+    a legacy serializer nobody has maintained since 2011, because the
+    modern path is tested and the legacy path is load-bearing. Every
+    parser dies on the leading '<', which is the HTTP equivalent of
+    being handed a phone book when you asked for the time.
+
+    Found wherever an old SOAP service is still wearing a REST trench
+    coat: enterprise systems, banking integrations, anywhere the
+    migration was "mostly done" and the last 5% was someone's job who
+    has since left the industry entirely.
+
+    The specimen exists to test your Accept-header handling and your
+    parser's ability to say "that's not what I asked for" instead of
+    attempting to XML-parse a response your entire worldview insists
+    should be JSON. Dignity in refusal is a client virtue.
+signature:
+  status: 200
+  headers:
+    Content-Type: application/xml
+  body: '<?xml version="1.0"?><response><user><id>12345</id><name>ada</name></user></response>'
+tags: [content-type, xml]

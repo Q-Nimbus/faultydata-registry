@@ -1,0 +1,34 @@
+id: FD-2026-089
+slug: pokemon-go-launch
+title: Launch-day capacity collapse (Pokémon GO, Jul 2016)
+category: composite
+severity: severe
+tests:
+- retry-logic
+- monitoring
+citation:
+  source: Google Cloud blog
+  url: https://cloud.google.com/blog/products/gcp/bringing-pokemon-go-to-life-on-google-cloud
+  date: '2016-07-01'
+tags:
+- real-world
+- capacity
+- launch
+anatomy: "Niantic planned for success and got fifty times success instead —\n  the most traffic a Google\
+  \ Cloud customer had ever generated, arriving in\n  about a week, powered by the entire planet simultaneously\
+  \ deciding to\n  hunt cartoon rats in car parks.\n\n  The failure mode was pure capacity arithmetic:\
+  \ logins 503ing and players\n  retrying so hard that the retry traffic itself became a meaningful\n\
+  \  fraction of the load. Every rejected trainer became a retrying trainer.\n  It is still the canonical\
+  \ answer to \"what does a launch that succeeds\n  too hard look like?\""
+signature:
+  phases:
+  - weight: 65
+    signature:
+      status: 503
+      headers:
+        Retry-After: '10'
+      body: '{"error":"trainer capacity reached — try again"}'
+  - weight: 35
+    signature:
+      status: 200
+      body: '{"status":"ok","trainers_online":"all of them"}'

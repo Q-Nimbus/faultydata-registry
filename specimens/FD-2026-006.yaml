@@ -1,0 +1,30 @@
+id: FD-2026-006
+slug: meta-bgp-2021
+title: Total reachability loss (Meta BGP withdrawal, Oct 2021)
+category: latency
+severity: fatal
+tests: [timeouts]
+citation:
+  source: Meta engineering — more details about the October 4 outage
+  url: https://engineering.fb.com/2021/10/05/networking-traffic/outage-details/
+  date: "2021-10-04"
+anatomy: |
+  On the 4th of October 2021, Facebook withdrew its BGP
+    routes and conceptually deleted itself from the internet's map. Six
+    hours. DNS gone, anycast gone, and — according to reports that read
+    like a sitcom pitch — the badge readers on the buildings where you'd
+    go to fix it, gone too. An outage so thorough it ate the repair tools,
+    the repair team, and the repair team's lunch.
+
+    From a client's chair it doesn't even look like an error. There's no
+    status code for "the destination has been reclassified as rumour".
+    SYN packets drift into the void like prayers to a god who resigned.
+
+    This specimen accepts your connection and then contemplates that void
+    indefinitely — the closest HTTP gets to "there is no there there".
+    If your client lacks a read timeout it will still be waiting when the
+    sun expands, which, to be fair, is roughly how long six hours felt on
+    Hacker News.
+signature:
+  hang: true
+tags: [real-world, outage, timeout]

@@ -1,0 +1,35 @@
+id: FD-2026-077
+slug: solarwinds-sunburst
+title: Digitally signed malicious update (SolarWinds SUNBURST, 2020)
+category: corruption
+severity: fatal
+tests: [parsing, monitoring]
+citation:
+  source: CISA Alert AA20-352A — Advanced Persistent Threat compromise of government agencies
+  url: https://www.cisa.gov/news-events/alerts/2020/12/13/advanced-persistent-threat-compromise-government-agencies-critical-infrastructure-and-private-sector-organizations
+  date: "2020-12-13"
+anatomy: |
+  Nation-state actors slipped SUNBURST into SolarWinds Orion build
+  pipeline, and the malicious update shipped to ~18,000 organisations
+  with a valid digital signature — the update mechanism worked
+  perfectly, which is what makes it the scariest specimen in the
+  building. Signed, checksummed, delivered, installed: every control
+  passed, because the corruption happened before the controls ran.
+
+  The specimen serves a plausibly-signed update payload — Content-Type
+  application/octet-stream, a body that looks like a legitimate hotfix
+  with a marker inside. Your pipeline will verify the signature,
+  because the signature is fine, and install it, because the signature
+  is fine. That is the entire lesson and it cost several governments
+  a very bad year.
+
+  Validation that stops at "is it authentic" is half a control. The
+  other half — "is it sane" — is what specimen pipelines are for.
+signature:
+  status: 200
+  headers:
+    Content-Type: application/octet-stream
+    Content-Disposition: attachment; filename="SolarWinds-Core-v2020.2.1-Hotfix.msp"
+    X-Signature: "sha256:valid"
+  body: 'OrionImprovementBusinessLayer.2 — SIGNED UPDATE — [sunburst-marker] — applies cleanly, unfortunately'
+tags: [real-world, supply-chain, security]

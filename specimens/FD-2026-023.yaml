@@ -1,0 +1,34 @@
+id: FD-2026-023
+slug: cloudflare-waf-2019
+title: Global 502s from a bad WAF rule (Cloudflare, Jul 2019)
+category: status
+severity: fatal
+tests: [semantics, monitoring]
+citation:
+  source: Cloudflare — details of the outage on July 2, 2019
+  url: https://blog.cloudflare.com/details-of-the-cloudflare-outage-on-july-2-2019/
+  date: "2019-07-02"
+anatomy: |
+  One managed WAF rule. One regex with a taste for catastrophic
+    backtracking. Every edge node on the planet simultaneously pinned its
+    CPU to the ceiling, and for half an hour Cloudflare served the planet
+    a 502 — a config push doing in thirty seconds what nation-state DDoS
+    crews budget quarters for. Efficiency, finally.
+
+    The detail that elevates it to art: the rule was rolled out globally
+    in one go because it was a security improvement, and nobody wanted to
+    be the change-manager who slow-rolled a security improvement. The
+    postmortem reportedly mentioned "global" and "canary" in ways that
+    will have aged magnificently.
+
+    Your client sees a 502 with a branded HTML body — the Cloudflare
+    error page being one of the most-viewed documents in internet
+    history, right up there with the Google homepage and the terms of
+    service nobody reads. Parse accordingly, or don't; the error is
+    unambiguous enough that even a bash script can figure it out.
+signature:
+  status: 502
+  headers:
+    Server: cloudflare
+  body: '<html><body><h1>502 Bad Gateway</h1><p>cloudflare</p></body></html>'
+tags: [real-world, outage, edge]

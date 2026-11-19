@@ -1,0 +1,41 @@
+id: FD-2026-063
+slug: ticketmaster-queue
+title: Queue collapse under demand (Ticketmaster Eras presale, Nov 2022)
+category: composite
+severity: severe
+tests: [retry-logic, semantics]
+citation:
+  source: Ticketmaster statement on Taylor Swift presale (archived); US Senate hearing testimony
+  url: https://www.judiciary.senate.gov/committee-activity/hearings/thats-the-ticket-promoting-competition-and-protecting-consumers-in-live-entertainment
+  date: "2022-11-15"
+anatomy: |
+  Ticketmaster put 3.5 billion requests' worth of demand through a
+  system built for a fraction of it — presale codes plus bots plus
+  actual humans — and the queue, designed to smooth load, collapsed
+  under it. Verified fans queued for hours and got kicked anyway; the
+  general sale was cancelled outright. The failure wasn't the 503s,
+  it was the queue position that kept changing.
+
+  The client-visible shape: intermittent success behind a wall of
+  "you're in queue" responses — a 200 that means "not yet", a 503
+  that means "never", and no header or field that reliably
+  distinguishes them. It's a rate limiter wearing a ticket stub.
+
+  Clients that treat every 200 as success will harvest queue pages and
+  call it data. Clients that check the body's queue state survive.
+  Clients that retry through it are part of the 3.5 billion, which is
+  a statistic and also a moral position.
+signature:
+  phases:
+    - weight: 60
+      signature:
+        status: 200
+        body: '{"queue":{"position":24732,"wait_seconds":1800,"status":"waiting"},"note":"you are in a queue. your request has not succeeded."}'
+    - weight: 30
+      signature:
+        status: 503
+        body: '{"error":"service unavailable","queue":"collapsed"}'
+    - weight: 10
+      signature:
+        status: 200
+tags: [real-world, composite, capacity]

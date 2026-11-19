@@ -1,0 +1,32 @@
+id: FD-2026-047
+slug: varnish-guru
+title: Guru Meditation (Varnish cache failure)
+category: status
+severity: severe
+tests: [parsing, semantics]
+anatomy: |
+  The Varnish cache's 503 page — "Error 503 Service Unavailable /
+  Guru Meditation" — is one of the most-seen error documents in
+  internet history, and the source of a thousand confused user
+  tickets asking what meditation had to do with anything. It's a
+  deliberate homage to the Amiga's crash screen, because the Varnish
+  authors understood that if you're going to fail, fail with
+  references.
+
+  When you see it, your origin is down and the cache is standing in
+  front of the wreckage doing its best impression of a website. From
+  the client's side: a 503 with an X-Varnish ID, an HTML body aimed
+  at humans, and not a scrap of JSON in sight — the cache layer's
+  way of saying "the thing you want is behind me, and behind me is
+  on fire".
+
+  Clients that parse every error body as JSON will produce a syntax
+  error pointing at HTML, which is accurate in the way that "the
+  bridge is out" is accurate when you're already in the river.
+signature:
+  status: 503
+  headers:
+    X-Varnish: "1847489127"
+    Content-Type: text/html; charset=utf-8
+  body: '<!DOCTYPE html><html><body><h1>Error 503 Service Unavailable</h1><p>Service Unavailable</p><h3>Guru Meditation:</h3><p>XID: 1847489127</p><hr><p>Varnish cache server</p></body></html>'
+tags: [cache, varnish, real-world-pattern]

@@ -1,0 +1,33 @@
+id: FD-2026-035
+slug: stack-trace-leak
+title: Stack trace in the error body
+category: corruption
+severity: severe
+tests: [parsing, semantics]
+citation:
+  source: OWASP — Improper Error Handling
+  url: https://owasp.org/www-community/Improper_Error_Handling
+anatomy: |
+  A 500 whose body is the full unedited stack trace —
+    framework version, absolute file paths, internal hostnames, and, if
+    the developer was feeling really generous, a JDBC connection string
+    complete with the database's private address. Not an error page so
+    much as a guided tour of the infrastructure, served fresh at 500.
+
+    Two failures for the price of one: the exception that caused it,
+    and the error handler that decided the correct response to an
+    internal fault was publishing the internals. Your client has to
+    chew through arbitrary multi-KB HTML without choking; their error
+    handler just handed you the recon phase of somebody's breach.
+
+    Clients that attempt to parse this as the expected format die on
+    the leading '<'. Clients that surface it raw to users give their
+    own users the tour. The correct behaviour is to treat it as opaque
+    failure and log the X-Fault-Specimen header, which is what a
+    professional would do. Which is what you are. Presumably.
+signature:
+  status: 500
+  headers:
+    Content-Type: text/html
+  body: '<html><body><h1>NullPointerException</h1><pre>java.lang.NullPointerException\n\tat com.acme.billing.ChargeService.authorize(ChargeService.java:214)\n\tat com.acme.billing.PaymentServlet.doPost(PaymentServlet.java:88)\n\tat javax.servlet.http.HttpServlet.service(HttpServlet.java:681)\nCaused by: java.sql.SQLException: Connection to db-int-03.acme.corp:5432 refused</pre></body></html>'
+tags: [info-disclosure, stack-trace]

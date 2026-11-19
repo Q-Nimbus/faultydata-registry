@@ -1,0 +1,31 @@
+id: FD-2026-053
+slug: sso-login-page
+title: SSO login page instead of your API response
+category: corruption
+severity: severe
+tests: [parsing, auth, semantics]
+anatomy: |
+  Your session expired somewhere in the middleware and the request
+  you made — the one asking for JSON — has been answered with a 302
+  to a login page, or, worse, a 200 containing a fully-rendered HTML
+  login form. The API is fine. The data is fine. You have simply been
+  escorted to a completely different building and handed a form.
+
+  This is the signature of session-based auth on an API that pretends
+  to be stateless, which is to say most enterprise integrations. The
+  client asked for data and received a username/password field, like
+  a letter that arrived containing a raffle ticket to a different
+  continent. The status code says 200. The Content-Type says text/
+  html. The body says "please sign in".
+
+  Clients that check Content-Type survive. Clients that parse status
+  codes and bodies on faith store a login page in their database,
+  where it remains until someone queries "why is the customer_name
+  field an HTML document" — a real thing that has really happened,
+  repeatedly, at companies whose names you know.
+signature:
+  status: 200
+  headers:
+    Content-Type: text/html; charset=utf-8
+  body: '<html><body><h2>Sign in to continue</h2><form method="post"><input name="username"/><input name="password" type="password"/><button>Sign in</button></form></body></html>'
+tags: [auth, session, enterprise]

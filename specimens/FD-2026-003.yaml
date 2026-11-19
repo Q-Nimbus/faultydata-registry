@@ -1,0 +1,42 @@
+id: FD-2026-003
+slug: aws-kinesis-2020
+title: Elevated latency + partial 5xx (AWS us-east-1, Nov 2020)
+category: composite
+severity: severe
+tests: [timeouts, monitoring]
+citation:
+  source: AWS post-event summary, Kinesis/us-east-1
+  url: https://aws.amazon.com/message/12721/
+  date: "2020-11-25"
+anatomy: |
+  Kinesis lost front-end capacity in us-east-1 in November 2020, and
+    since half of AWS drinks from Kinesis — CloudWatch, Cognito,
+    autoscaling, the very dashboards you'd use to notice — the blast radius
+    included services whose only crime was standing too close at the bar.
+    Correlated failure: the thing you don't think you depend on, failing
+    because of the thing you didn't know you depended on.
+
+    The signature is the nasty variant: not a clean outage but a
+    malingering one. Elevated latency AND random 500s AND intermittent
+    success, all at once, for hours. Every request a lottery ticket; the
+    jackpot is your data, eventually, maybe, subject to availability.
+
+    This is the failure mode that makes dashboards glow green while users
+    queue for the fire exits. If your alerting watches error rate OR
+    latency but never both, this specimen is about to embarrass it in front
+    of management.
+signature:
+  phases:
+    - weight: 60
+      signature:
+        status: 200
+        delay: { ms: 4000, jitter_ms: 2000 }
+    - weight: 25
+      signature:
+        status: 500
+        delay: { ms: 1500 }
+        body: '{"message":"Internal server error"}'
+    - weight: 15
+      signature:
+        status: 200
+tags: [composite, latency, real-world, degradation]

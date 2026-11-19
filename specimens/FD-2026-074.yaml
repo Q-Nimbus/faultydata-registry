@@ -1,0 +1,30 @@
+id: FD-2026-074
+slug: nul-bytes
+title: NUL bytes embedded in JSON
+category: corruption
+severity: moderate
+tests: [parsing]
+anatomy: |
+  The JSON is structurally valid except for the NUL bytes scattered
+  through the strings — \x00, the terminator, sitting in the middle
+  of a field value like a landmine in a picnic. Strict JSON parsers
+  reject it outright (control characters must be escaped), lenient
+  ones read it and produce strings with invisible holes.
+
+  Where it comes from: C-language backends that read fixed-width
+  buffers and serialize the padding; file formats that store strings
+  NUL-terminated; a pipeline hop that treated the payload as a C
+  string, which it was, in the sense that everything is a C string
+  if you're careless enough. The bytes are data to one layer and
+  end-of-string to another — the same payload meaning different
+  things at different layers, which is the entire history of
+  injection bugs in one sentence.
+
+  Clients that pass the body through C-adjacent code will see the
+  string end early — "ad" instead of "ada" — and if that string is
+  an ID, a name, or a checksum, the missing bytes are now your
+  incident.
+signature:
+  status: 200
+  corrupt: nulls
+tags: [json, encoding, parsing]

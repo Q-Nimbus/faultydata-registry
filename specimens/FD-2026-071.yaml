@@ -1,0 +1,27 @@
+id: FD-2026-071
+slug: 204-with-body
+title: 204 No Content... with content
+category: headers
+severity: moderate
+tests: [semantics, parsing]
+anatomy: |
+  HTTP 204 means "there is no body". This response has a body. The
+  spec is unambiguous; the implementation was not consulted. Data
+  arrives that the protocol swears doesn't exist — Schrödinger's
+  payload, present and absent, depending on which part of the
+  response you believe.
+
+  Delivered raw because any self-respecting framework strips the
+  body on a 204 automatically — producing this fault requires going
+  around the framework, which is also how it happens in production:
+  a proxy, a hand-rolled response writer, a legacy CGI script that
+  prints status lines like it's 1997 and nobody's told it.
+
+  Clients that trust the status code discard the body — fine, unless
+  the body was the error message. Clients that read the body anyway
+  get data the status code said wasn't there, which is technically
+  a bonus and practically a compliance incident.
+expect: [ok, parse_error, connection_error]
+signature:
+  raw: "HTTP/1.1 204 No Content\r\nContent-Type: application/json\r\nX-Fault-Specimen: FD-2026-071\r\n\r\n{\"error\":\"this body should not exist but does\"}"
+tags: [status, protocol, spec-violation]

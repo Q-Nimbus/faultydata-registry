@@ -1,0 +1,40 @@
+id: FD-2026-021
+slug: aws-s3-typo-2017
+title: S3 us-east-1 subsystem removal (AWS, Feb 2017)
+category: composite
+severity: fatal
+tests: [retry-logic, monitoring]
+citation:
+  source: AWS summary of the S3 service disruption
+  url: https://aws.amazon.com/message/41926/
+  date: "2017-02-28"
+anatomy: |
+  A debugger typed a command intended to remove a small
+    number of index servers and removed the index service of the largest
+    object store on Earth instead — a typo with the blast radius of a
+    small moon. For hours, ~90% of requests returned errors, and a
+    quarter of the internet discovered, simultaneously and in public,
+    that "multi-region" was a slide in a deck rather than an engineering
+    practice.
+
+    The detail that makes it art: everyone had put their eggs in
+    us-east-1, because us-east-1 is where the eggs go, it says so right
+    there in the default dropdown. The blast radius of one fat-fingered
+    command included the status page that would have told you about it.
+    Your monitoring was also down. It was also in us-east-1. Of course it
+    was.
+
+    Ninety percent errors, ten percent success — enough to keep the
+    retries coming, like a slot machine that pays out just often enough
+    to ruin you. If your client treats intermittent success as health,
+    it will die believing everything was almost fine.
+signature:
+  phases:
+    - weight: 90
+      signature:
+        status: 503
+        body: '<?xml version="1.0" encoding="UTF-8"?><Error><Code>ServiceUnavailable</Code><Message>Service is unable to handle request</Message></Error>'
+    - weight: 10
+      signature:
+        status: 200
+tags: [real-world, composite, aws]

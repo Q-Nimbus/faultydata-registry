@@ -1,0 +1,34 @@
+id: FD-2026-008
+slug: waf-challenge-page
+title: WAF challenge page instead of JSON (Cloudflare pattern)
+category: headers
+severity: moderate
+tests: [parsing, semantics]
+citation:
+  source: Cloudflare docs — Cloudflare challenges
+  url: https://developers.cloudflare.com/waf/reference/cloudflare-challenges/
+anatomy: |
+  Your JSON API request wanders past the WAF on a Tuesday
+    afternoon and gets bounced — not rejected, not 403'd, but handed a
+    branded HTML challenge page. A JavaScript puzzle, an interstitial, a
+    cheerful little "checking your browser" screen, delivered with HTTP
+    200 and Content-Type: text/html. Technically a successful response.
+    Spiritually a hostage video.
+
+    The client asked for application/json and received a CAPTCHA's
+    overachieving cousin. Every parser downstream now has a choice: die
+    loudly on the leading '<', or silently treat an anti-bot page as your
+    data model — the two canonical ways to ruin an afternoon, available
+    in one convenient specimen.
+
+    This is what your monitoring sees: 200 OK, content delivered, green
+    tick. What your pipeline sees: an HTML page where the invoice data
+    used to live, like arriving at a library to find it has been replaced
+    by a quiz.
+signature:
+  status: 403
+  headers:
+    Content-Type: text/html; charset=UTF-8
+    CF-Mitigated: challenge
+  body: '<!DOCTYPE html><html><head><title>Just a moment...</title></head><body><h1>Checking your browser</h1><p>Enable JavaScript and cookies to continue</p></body></html>'
+tags: [real-world, waf, content-type]

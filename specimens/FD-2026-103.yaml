@@ -1,0 +1,24 @@
+id: FD-2026-103
+slug: zombie-health-check
+title: Zombie health check (200 while dead inside)
+category: status
+severity: moderate
+tests:
+- monitoring
+- semantics
+tags:
+- health
+- monitoring
+- classic
+anatomy: "The process is dead. The database connection pool drained an\n  hour ago. The queue consumer\
+  \ hasn't acked a message since Tuesday.\n  But the /healthz endpoint — a different codepath, wired to\
+  \ a handler\n  that only checks whether the binary still executes — returns a\n  beautiful, gleaming\
+  \ 200 {\"status\":\"ok\"}.\n\n  Every load balancer that ever kept routing to a corpse did so because\n\
+  \  of this specimen. Shallow health checks report liveness; your clients\n  needed readiness. The difference\
+  \ is a page at 4am."
+signature:
+  status: 200
+  headers:
+    Content-Type: application/json
+  body: '{"status":"ok","checks":{"database":"ok","queue":"ok","cache":"ok"},"note":"all checks are stub
+    implementations; nothing is ok"}'

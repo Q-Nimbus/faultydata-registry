@@ -1,0 +1,39 @@
+id: FD-2026-088
+slug: dyn-ddos-2016
+title: DNS provider drowns in DDoS (Dyn, Oct 2016)
+category: composite
+severity: fatal
+tests:
+- timeouts
+- retry-logic
+citation:
+  source: Krebs on Security
+  url: https://krebsonsecurity.com/2016/10/ddos-on-dyn-impacts-twitter-spotify-reddit/
+  date: '2016-10-21'
+tags:
+- real-world
+- dns
+- ddos
+anatomy: "A botnet of compromised webcams and toasters — Mirai, because of\n  course your toaster has\
+  \ a botnet — pointed roughly ten million devices at\n  Dyn's resolvers on a Friday morning. Twitter,\
+  \ Spotify, Reddit, Netflix:\n  all technically running perfectly, all functionally dead, because the\n\
+  \  phone book was on fire.\n\n  The responses were the worst kind: not errors, just absence. Queries\n\
+  \  sailed into the void and came back as timeouts, which meant every client\n  in America learned the\
+  \ same lesson simultaneously — your DNS timeout\n  configuration is your actual uptime configuration."
+signature:
+  phases:
+  - weight: 60
+    signature:
+      status: 503
+      delay:
+        ms: 4000
+        jitter_ms: 2000
+      body: '{"error":"resolver timeout"}'
+  - weight: 25
+    signature:
+      status: 503
+      body: '{"error":"SERVFAIL"}'
+  - weight: 15
+    signature:
+      status: 200
+      body: '{"answer":"93.184.216.34","ttl":300}'

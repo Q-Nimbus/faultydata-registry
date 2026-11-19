@@ -1,0 +1,30 @@
+id: FD-2026-050
+slug: enhance-your-calm
+title: "420 Enhance Your Calm (Twitter API v1.1)"
+category: status
+severity: moderate
+tests: [semantics, retry-logic]
+citation:
+  source: Twitter API v1.1 error codes documentation (archived)
+  url: https://developer.twitter.com/en/support/twitter-api/error-troubleshooting
+  date: "2012-10-26"
+anatomy: |
+  Twitter API v1.1, in an act of documentation comedy for which they
+  have never been forgiven, rate-limited clients with HTTP 420 —
+  "Enhance Your Calm", a status code borrowed from a joke RFC and
+  deployed in production at one of the largest APIs on Earth. Clients
+  written to switch on 429 got... 420, a number their enum didn't
+  have, and reacted with the full range of outcomes from "fine" to
+  "unhandled status code exception in the retry middleware".
+
+  It is the single greatest argument that "5xx means retry, 4xx
+  means stop" was always a polite fiction. The vendors will make up
+  status codes. Your client must be ready for a rate limit delivered
+  by the number four hundred and twenty, because someone, somewhere,
+  thought it was funny. They were right, but that's not the point.
+
+  Enhance your calm. Then check your status-code handling.
+signature:
+  status: 420
+  body: '{"errors":[{"code":88,"message":"Rate limit exceeded"}]}'
+tags: [real-world, rate-limit, status]

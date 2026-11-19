@@ -1,0 +1,28 @@
+id: FD-2026-037
+slug: nan-infinity-literals
+title: Non-JSON literals in JSON (NaN / Infinity)
+category: corruption
+severity: moderate
+tests: [parsing]
+anatomy: |
+  A Python pipeline serialized a dataframe and shipped {"balance":
+    NaN, "score": Infinity} — legal in exactly one ecosystem and a
+    SyntaxError in every other. JSON does not have NaN. JSON does not
+    have Infinity. Python's json module emits them anyway, out of what
+    can only be described as optimism, and reads them back the same way,
+    so the bug is invisible to the team that produced it and fatal to
+    everyone else.
+
+    JavaScript throws. Go throws. Java throws. Python, the sole member
+    of the "that's fine actually" party, reads it back and sees nothing
+    wrong — which is precisely how this poison reached production,
+    like a disease that only shows symptoms in other countries.
+
+    Your client's behaviour here divides neatly into "rejects it"
+    (correct), "parses it as float64 infinity" (defensible), and
+    "silently stores it" (a future incident report with your name in the
+    contributing factors).
+signature:
+  status: 200
+  body: '{"balance": NaN, "score": Infinity, "floor": -Infinity, "name": "ada"}'
+tags: [json, encoding, types]

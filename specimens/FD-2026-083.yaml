@@ -1,0 +1,29 @@
+id: FD-2026-083
+slug: payment-required
+title: HTTP 402 Payment Required
+category: status
+severity: moderate
+tests: [semantics]
+citation:
+  source: RFC 9110 — HTTP Semantics, 402 status code
+  url: https://www.rfc-editor.org/rfc/rfc9110
+anatomy: |
+  HTTP 402 — "Payment Required", reserved since HTTP/1.0 for "future
+  use" and then actually used by a few brave APIs (Google's old one,
+  some payment gateways, your invoice) to mean exactly what it says:
+  your account has run out of money. Not rate-limited. Not forbidden.
+  Just broke.
+
+  It is the only 4xx that is specifically about the state of your
+  wallet, and it separates clients cleanly: those that treat 4xx as
+  "client error, retry with better input" will retry a billing
+  problem forever, and those that read the body will learn they've
+  been switched to a payment plan they didn't know had a bottom.
+
+  A rare status in the wild — which is exactly why it belongs in the
+  museum: the day an API returns 402 is the day your error handling
+  discovers it has a gap in the enum.
+signature:
+  status: 402
+  body: '{"error":"payment_required","message":"Your account balance is insufficient to continue. Please top up."}'
+tags: [status, billing, rare]

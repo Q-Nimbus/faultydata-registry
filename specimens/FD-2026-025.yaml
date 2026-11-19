@@ -1,0 +1,30 @@
+id: FD-2026-025
+slug: akamai-dns-2021
+title: Edge DNS unreachable (Akamai, Jul 2021)
+category: latency
+severity: fatal
+tests: [timeouts]
+citation:
+  source: Akamai Edge DNS service disruption summary
+  url: https://www.akamai.com/blog/edge/akamai-summarizes-service-disruption-resolved
+  date: "2021-07-22"
+anatomy: |
+  Akamai shipped a config bug in Edge DNS and name resolution
+    for a decent slice of the planet quietly ceased — PlayStation
+    Network, Steam, airlines, actual banks. The services were all fine.
+    Perfectly healthy. Nobody could find them. It's the internet
+    equivalent of every road sign in the country being replaced by a
+    polite shrug overnight.
+
+    To a client, DNS death doesn't look like an error at all — there's
+    no status code, no body, no response, just a name that no longer
+    resolves to anything. The request fails before it begins, like a
+    letter to a street that has been renamed by decree.
+
+    This specimen simulates that by holding your connection and saying
+    absolutely nothing, which is what the network feels like from inside
+    the failure. Your resolver will give up eventually. Your retry logic
+    will want to. Your users already have.
+signature:
+  hang: true
+tags: [real-world, dns, timeout]

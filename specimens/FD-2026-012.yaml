@@ -1,0 +1,27 @@
+id: FD-2026-012
+slug: trailing-comma
+title: Malformed JSON (trailing comma)
+category: corruption
+severity: trivial
+tests: [parsing]
+anatomy: |
+  A trailing comma. {"a": 1,} — legal in JavaScript, legal in every
+    config file your team has ever touched, and a hard SyntaxError in
+    actual JSON, a specification that was designed in ten days and has
+    held a grudge ever since.
+
+    This is the signature of a payload assembled by string concatenation
+    rather than a serializer — someone's for-loop appending `field,` until
+    the last one is left standing there like the last guest at a party,
+    holding a comma and nobody's coat. Python's json module rejects it.
+    Go rejects it. Node's JSON.parse rejects it. Only the file's author,
+    reading it in VS Code where it looks completely normal, sees nothing
+    wrong.
+
+    The parser error message won't say "trailing comma", by the way. It'll
+    say "unexpected token }" at a line number, and let you do the
+    archaeology yourself.
+signature:
+  status: 200
+  corrupt: malformed
+tags: [json, parser]

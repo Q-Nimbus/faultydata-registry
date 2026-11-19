@@ -1,0 +1,24 @@
+id: FD-2026-092
+slug: rogers-blackout-2022
+title: Nationwide core-network kill (Rogers, Jul 2022)
+category: sequence
+severity: fatal
+tests:
+- timeouts
+- monitoring
+citation:
+  source: Wikipedia
+  url: https://en.wikipedia.org/wiki/2022_Rogers_Communications_outage
+  date: '2022-07-08'
+tags:
+- real-world
+- network
+- total-outage
+anatomy: "A maintenance change on Rogers' core network deleted a routing\n  filter, which cascaded into\
+  \ knocking out a quarter of Canada's internet —\n  phone service, banking, Interac payments, 911 access,\
+  \ the lot — for the\n  better part of a day. The emergency broadcast system worked fine, which\n  was\
+  \ fortunate because nothing else did.\n\n  The signature is the purest one in the collection: the connection\
+  \ simply\n  dies. No status, no body, no apology. One day the socket is there; the\n  next it has been\
+  \ terminated mid-sentence by a change management process\n  that skipped a checkbox."
+signature:
+  reset: true

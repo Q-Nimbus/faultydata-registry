@@ -1,0 +1,32 @@
+id: FD-2026-032
+slug: healthcare-gov-launch
+title: Capacity-collapse 503s (Healthcare.gov launch, Oct 2013)
+category: status
+severity: severe
+tests: [retry-logic, parsing]
+citation:
+  source: US HHS / congressional testimony on HealthCare.gov launch
+  url: https://www.gao.gov/products/gao-14-694
+  date: "2013-10-01"
+anatomy: |
+  Provisioned for a fraction of actual load and launched on
+    live television: nearly every request errored or timed out on day
+    one of Healthcare.gov. The canonical "it worked in staging", where
+    staging was six VMs, three optimistic interns, and a load test
+    that was, charitably, aspirational.
+
+    What the client receives is a bare 503 — no Retry-After, no error
+    schema, no JSON body, not even a branded apology page. Just a door
+    slammed in the face of a hundred-million-person queue. The emptiest
+    possible way of saying no: not even a body to parse, just status
+    and silence.
+
+    This specimen exists to test your client's behaviour when the
+    server has absolutely nothing to say. Some clients handle it fine.
+    Some clients crash trying to JSON.parse an empty string, which is
+    a bit like fainting because a mime stopped performing.
+signature:
+  status: 503
+  body: ''
+  corrupt: empty
+tags: [real-world, capacity]

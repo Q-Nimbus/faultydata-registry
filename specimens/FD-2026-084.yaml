@@ -1,0 +1,27 @@
+id: FD-2026-084
+slug: huge-body
+title: Response body larger than expected (2MB JSON)
+category: corruption
+severity: moderate
+tests: [parsing, timeouts]
+anatomy: |
+  The API returns a 2MB JSON array where the client expected a
+  record — technically valid, syntactically perfect, and large
+  enough to make your buffer allocation question its life choices.
+  Not truncated, not corrupted: just enormous, like a reply to "what
+  time is it" that contains the history of horology.
+
+  This is what pagination-free endpoints degrade into: a table that
+  was twelve rows at launch and two million rows by year three, still
+  faithfully serialized in full because nobody added a LIMIT clause
+  and the frontend paginates client-side. The client-side part is
+  doing a lot of work in that sentence.
+
+  Clients that read the whole body before parsing will buffer 2MB
+  for a payload they needed 200 bytes of. Clients that stream will
+  get the first items early and can bail. Both are valid strategies;
+  only one survives "the table grew".
+signature:
+  status: 200
+  corrupt: huge
+tags: [size, json, streaming]

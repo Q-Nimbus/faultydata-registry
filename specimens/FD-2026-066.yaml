@@ -1,0 +1,33 @@
+id: FD-2026-066
+slug: captive-portal
+title: Captive portal interception (HTTP 511)
+category: status
+severity: moderate
+tests: [semantics, parsing]
+citation:
+  source: RFC 6585 — Additional HTTP Status Codes (511)
+  url: https://www.rfc-editor.org/rfc/rfc6585
+anatomy: |
+  You're behind a captive portal — hotel wifi, airport lounge, the
+  train — and your API request has been intercepted by a machine that
+  wants you to accept terms, watch an advert, or pay eleven pounds
+  for bandwidth measured in sadness. The RFC defines 511 Network
+  Authentication Required for exactly this. The portal returns a
+  login page with a status code that tells the truth for once.
+
+  From the client's chair it looks like the API has been replaced by
+  a hospitality brochure: status 511, Content-Type text/html, a body
+  full of checkboxes and a Wi-Fi logo. Every JSON parser dies on it.
+  Every monitoring system reports the API "down" when actually the
+  API is fine and YOU are the one in a hotel.
+
+  The correct client behaviour is recognizing it isn't talking to the
+  API at all — a distinction that matters, because retrying an API
+  that doesn't know you exist is the most futile retry in the
+  catalogue, and the catalogue contains a redirect loop.
+signature:
+  status: 511
+  headers:
+    Content-Type: text/html; charset=utf-8
+  body: '<html><body><h1>Welcome to Hotel WiFi</h1><p>Please accept the terms to continue.</p><form><button>Connect</button></form></body></html>'
+tags: [captive-portal, network, status]

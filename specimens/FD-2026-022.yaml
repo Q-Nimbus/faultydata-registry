@@ -1,0 +1,40 @@
+id: FD-2026-022
+slug: aws-dec-2021
+title: AWS console/API errors (us-east-1, Dec 2021)
+category: composite
+severity: severe
+tests: [timeouts, monitoring]
+citation:
+  source: AWS post-event summaries, December 2021
+  url: https://aws.amazon.com/message/12721/
+  date: "2021-12-07"
+anatomy: |
+  Internal congestion separated AWS's control network from its data
+    network in December 2021 — a polite way of saying the dashboard that
+    tells you the dashboard is broken was also broken, and you found out
+    about the outage from Twitter, which was also on AWS, which is a
+    sentence that should never have been possible.
+
+    API errors, stretched latencies, monitoring reporting on itself like
+    a doctor who has fainted mid-diagnosis. The canonical illustration of
+    why "watch us-east-1 from us-east-1" is not a monitoring strategy —
+    it's a coincidence generator wearing a pager.
+
+    Three flavours at once: outright 500s, requests that succeed after
+    eight seconds of silent contemplation, and the occasional normal
+    response to keep you guessing. Your client gets to decide which of
+    three parallel universes each request belongs to. Good luck.
+signature:
+  phases:
+    - weight: 45
+      signature:
+        status: 500
+        body: '{"message":"Internal error"}'
+    - weight: 35
+      signature:
+        status: 200
+        delay: { ms: 8000, jitter_ms: 3000 }
+    - weight: 20
+      signature:
+        status: 200
+tags: [real-world, composite, aws]

@@ -1,0 +1,38 @@
+id: FD-2026-044
+slug: roblox-consul
+title: Three-day outage from a consensus bug (Roblox, Oct 2021)
+category: composite
+severity: fatal
+tests: [retry-logic, monitoring]
+citation:
+  source: Roblox engineering blog — analysis of the October 2021 outage
+  url: https://blog.roblox.com/2022/01/roblox-return-to-service-10-28-10-31-2021/
+  date: "2021-10-28"
+anatomy: |
+  Roblox went down for seventy-three hours — not a typo, three actual
+  days — because a Consul cluster under sustained load developed a
+  subtle streaming bug that wedged the service discovery layer, which
+  meant the services couldn't find each other, which meant sixty
+  million children simultaneously discovered the concept of an outage
+  window. The postmortem is genuinely excellent and reads like a
+  detective novel where the murderer is a heartbeat timer.
+
+  The client-visible shape: mostly hard 503s with the occasional
+  tantalizing success, for a duration measured in news cycles. This is
+  the composite that separates "has retry logic" from "has a
+  degradation strategy" — any client can survive a blip, only a
+  designed one survives a weekend.
+
+  Weighted composite: three-quarters 503, a quarter teasing 200s. Like
+  the platform itself, it will keep you hopeful far longer than is
+  reasonable.
+signature:
+  phases:
+    - weight: 75
+      signature:
+        status: 503
+        body: '{"errors":[{"code":0,"message":"Service is temporarily unavailable"}]}'
+    - weight: 25
+      signature:
+        status: 200
+tags: [real-world, composite, service-discovery]

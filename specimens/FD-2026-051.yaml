@@ -1,0 +1,33 @@
+id: FD-2026-051
+slug: teapot-418
+title: I'm a teapot (HTTP 418, HTCPCP/RFC 7168)
+category: status
+severity: trivial
+tests: [semantics]
+citation:
+  source: RFC 7168 — The Hyper Text Coffee Pot Control Protocol for Tea Efflux Appliances
+  url: https://www.rfc-editor.org/rfc/rfc7168
+  date: "2014-04-01"
+anatomy: |
+  RFC 7168 defines status 418 — "I'm a teapot" — for requests a
+  teapot cannot fulfill because it is, and cannot stress this enough,
+  a teapot. It was an April Fools' joke in 1998 and it's now more
+  load-bearing than most of your error handling: real APIs return it,
+  Google famously served it for years, and it survived a formal
+  campaign to have it removed from HTTP libraries on the grounds that
+  jokes shouldn't have status codes. The jokes won.
+
+  Every client must answer the question: what do you do with a 418?
+  It's a 4xx, so stop. But it's also meaningless, so... what was the
+  error? There wasn't one. The response is a compliance test for
+  "does your error handling handle errors that are technically
+  correct and spiritually absurd".
+
+  Clients that fall through to a generic "unexpected status" path
+  pass. Clients that crash on an unmapped status code have learned
+  something about the world's sense of humour, which is that the
+  world's sense of humour is also load-bearing.
+signature:
+  status: 418
+  body: '{"error":"I\u0027m a teapot","short_and_stout":true}'
+tags: [status, rfc, joke]

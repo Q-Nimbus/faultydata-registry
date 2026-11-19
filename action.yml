@@ -1,0 +1,88 @@
+name: faultydata
+description: Grade your HTTP client against cited real-world failure signatures — real outages, replayed live.
+author: Q-Nimbus
+branding:
+  icon: alert-triangle
+  color: orange
+inputs:
+  suite:
+    description: >-
+      Suite to run. starter (10 exhibits, ~1 min) is the default;
+      transport, retry-logic, timeouts, parsing, headers, auth, semantics,
+      monitoring, loops, real-world, wire and all are also available
+      (see https://faultydata.com/api/suites).
+    default: starter
+  client:
+    description: >-
+      Shell command run once per exhibit. $FD_URL holds the exhibit URL and
+      {url} is substituted in the arguments; $FD_API_KEY is set when
+      api-key is given. Print FD_OUTCOME=<outcome> to report what your
+      client did (see https://faultydata.com/docs#runner). Leave empty to
+      grade Go's net/http with default settings.
+    required: false
+    default: ""
+  name:
+    description: Client label shown on the report card.
+    default: github action
+  min-score:
+    description: Exit non-zero when the score is below this (0-100).
+    default: "0"
+  fd-version:
+    description: fd release to download from https://faultydata.com/dl/.
+    default: "0.2.0"
+  api-key:
+    description: FaultyData API key — raises the rate limit for large suites.
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - name: Install fd
+      shell: bash
+      env:
+        FD_VERSION: ${{ inputs.fd-version }}
+      run: |
+        set -euo pipefail
+        case "$(uname -s)-$(uname -m)" in
+          Linux-x86_64)        target=linux-amd64 ;;
+          Linux-aarch64|Linux-arm64) target=linux-arm64 ;;
+          Darwin-arm64)        target=darwin-arm64 ;;
+          Darwin-x86_64)       target=darwin-amd64 ;;
+          MINGW*|MSYS*|CYGWIN*) target=windows-amd64; ext=.exe ;;
+          *) echo "faultydata: unsupported platform $(uname -s)-$(uname -m)" >&2; exit 1 ;;
+        esac
+        base="https://faultydata.com/dl"
+        curl -fsSLO "$base/fd-$target$ext"
+        curl -fsSLO "$base/SHA256SUMS"
+        grep "fd-$target$ext\$" SHA256SUMS | sha256sum -c -
+        mv "fd-$target$ext" fd
+        chmod +x fd
+    - name: Grade the client
+      shell: bash
+      env:
+        FD_API_KEY: ${{ inputs.api-key }}
+        SUITE: ${{ inputs.suite }}
+        CLIENT: ${{ inputs.client }}
+        CNAME: ${{ inputs.name }}
+        MIN_SCORE: ${{ inputs.min-score }}
+      run: |
+        set -uo pipefail
+        args=(-suite "$SUITE" -name "$CNAME" -min-score "$MIN_SCORE")
+        if [ -n "$CLIENT" ]; then
+          ./fd run "${args[@]}" -- bash -c "$CLIENT" | tee fd-output.txt
+        else
+          ./fd run "${args[@]}" | tee fd-output.txt
+        fi
+        rc=${PIPESTATUS[0]}
+        url=$(grep -oE 'https://faultydata\.com/report/[a-f0-9]+' fd-output.txt | head -1 || true)
+        badge=$(grep -oE 'https://faultydata\.com/badge/[a-f0-9]+\.svg' fd-output.txt | head -1 || true)
+        {
+          echo "### FaultyData report card"
+          if [ -n "$url" ]; then
+            echo "$url"
+            [ -n "$badge" ] && echo "![faultydata grade]($badge)"
+          else
+            echo "_(no report card — see step log)_"
+          fi
+        } >> "$GITHUB_STEP_SUMMARY"
+        exit "$rc"

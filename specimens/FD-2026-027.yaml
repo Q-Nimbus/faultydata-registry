@@ -1,0 +1,35 @@
+id: FD-2026-027
+slug: azure-ad-key-rollover
+title: Signing-key rollover breaks token validation (Azure AD, Mar 2021)
+category: status
+severity: severe
+tests: [auth, retry-logic]
+citation:
+  source: Microsoft preliminary RCA — Azure AD outage March 2021
+  url: https://azure.microsoft.com/en-us/blog/update-on-azure-ad-service-disruption/
+  date: "2021-03-15"
+anatomy: |
+  Azure AD rotated a signing key into an environment that
+    didn't support it, and every token signed with it started failing
+    validation planet-wide — users with perfectly healthy refresh flows
+    met 401 invalid_signature, re-authenticated like good citizens, got
+    a fresh token signed by the same bad key, and were bounced again.
+    The door is locked. You get a new key. The new key is cut wrong at
+    the factory. Repeat until morale improves.
+
+    The fix, per the postmortem: rotate back, then forward again,
+    properly this time — a procedure that works on paper and in
+    production takes four hours because nothing involving keys ever
+    happens at the speed you want at 1am.
+
+    Your client sees an honest 401 with a WWW-Authenticate header that
+    actually explains itself — invalid_token, signature invalid — which
+    is more than most outages bother with. The trap is responding to it
+    by hammering the token endpoint, which is how you turn an identity
+    outage into two incidents.
+signature:
+  status: 401
+  headers:
+    WWW-Authenticate: 'Bearer error="invalid_token", error_description="The signature is invalid"'
+  body: '{"error":"invalid_client","error_description":"AADSTS90002: Invalid signature in the access token."}'
+tags: [real-world, auth, token]

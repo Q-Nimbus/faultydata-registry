@@ -1,0 +1,28 @@
+id: FD-2026-096
+slug: codespaces-deleted-2014
+title: The endpoint that never came back (Code Spaces, Jun 2014)
+category: status
+severity: fatal
+tests:
+- monitoring
+- semantics
+citation:
+  source: InfoWorld
+  url: https://www.infoworld.com/article/2608076/murder-in-the-amazon-cloud.html
+  date: '2014-06-01'
+tags:
+- real-world
+- '410'
+- company-death
+anatomy: "An attacker got into Code Spaces' AWS console, demanded ransom,\n  and when refused deleted\
+  \ everything — machines, volumes, snapshots, and\n  crucially the backups, which lived in the same account\
+  \ as the things\n  they were backing up. The company announced it was closing within\n  twelve hours.\
+  \ It remains the canonical proof that \"the backups are in\n  the cloud\" is not a sentence, it is a\
+  \ location.\n\n  The signature is a 410 Gone, permanently. Not a 503 implying a future;\n  a headstone.\
+  \ The only specimen in the registry where the correct\n  handling is to update your DR plan."
+signature:
+  status: 410
+  headers:
+    Content-Type: application/json
+  body: '{"error":"gone","detail":"service permanently discontinued; backups deleted with the data they
+    were protecting"}'

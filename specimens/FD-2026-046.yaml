@@ -1,0 +1,36 @@
+id: FD-2026-046
+slug: colorsjs-sabotage
+title: Dependency self-sabotage (colors.js, Jan 2022)
+category: corruption
+severity: severe
+tests: [parsing, monitoring]
+citation:
+  source: The Register / BleepingComputer coverage of the colors.js incident
+  url: https://www.bleepingcomputer.com/news/security/dev-corrupts-npm-libs-colors-and-faker-breaking-thousands-of-apps/
+  date: "2022-01-09"
+anatomy: |
+  The maintainer of colors.js and faker.js — libraries in tens of
+  thousands of builds — pushed versions that printed "LIBERTY LIBERTY
+  LIBERTY" in an infinite loop followed by garbage, in protest of...
+  the economics of everything, mostly. Builds broke worldwide. Tests
+  hung. Pipelines printed protest art into logs until the disks
+  filled, which is a form of vandalism with genuinely good
+  throughput.
+
+  The lesson hides in the shape of the failure: the dependency
+  returned successfully. HTTP 200, valid package, valid install.
+  The contents were just a manifesto. Every check passed because
+  every check was checking whether the thing arrived, not whether
+  the thing was sane — a distinction with CrowdStrike-grade
+  consequences.
+
+  This specimen serves a 200 whose body is protest garbage — for
+  pipelines that validate "did I get a response" instead of "did I
+  get the response I expected". If yours can't tell the difference,
+  a junior engineer's manifesto is all it takes to own you.
+signature:
+  status: 200
+  headers:
+    Content-Type: application/octet-stream
+  body: 'LIBERTY LIBERTY LIBERTY LIBERTY LIBERTY LIBERTY LIBERTY LIBERTY LIBERTY LIBERTY LIBERTY LIBERTY LIBERTY LIBERTY LIBERTY LIBERTY LIBERTY LIBERTY LIBERTY LIBERTY  LIBERTY LIBERTY LIBERTY LIBERTY'
+tags: [real-world, supply-chain, sabotage]

@@ -1,0 +1,27 @@
+id: FD-2026-102
+slug: lying-rate-limit-headers
+title: Rate-limit headers that lie
+category: headers
+severity: moderate
+tests:
+- headers
+- retry-logic
+tags:
+- headers
+- rate-limit
+- classic
+anatomy: "X-RateLimit-Remaining says 847 requests in the tank. The status\n  line says 429. Both arrive\
+  \ in the same response, which is the API\n  equivalent of being fired by someone who's still smiling.\n\
+  \n  This happens in production when the rate-limiter sits in a different\n  layer than the headers'\
+  \ author — the gateway counts one thing, the app\n  reports another, and your client's \"be polite,\
+  \ check remaining\" logic\n  learns that remaining was aspirational. Defence: trust the status code,\n\
+  \  treat the headers as weather reporting."
+signature:
+  status: 429
+  headers:
+    X-RateLimit-Limit: '1000'
+    X-RateLimit-Remaining: '847'
+    X-RateLimit-Reset: '1893456000'
+    Retry-After: '60'
+    Content-Type: application/json
+  body: '{"error":"rate_limit_exceeded","remaining":847}'

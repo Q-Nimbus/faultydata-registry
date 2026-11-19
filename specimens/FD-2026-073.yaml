@@ -1,0 +1,30 @@
+id: FD-2026-073
+slug: retry-after-zero
+title: "Retry-After: 0 (storm bait)"
+category: headers
+severity: moderate
+tests: [retry-logic, headers]
+anatomy: |
+  A 503 with Retry-After: 0 — technically valid, semantically a dare.
+  "Service unavailable, come back in zero seconds" is the server's
+  way of saying "I'm broken but please continue hammering me", which
+  a compliant client will do, at full speed, forever, converting a
+  temporary overload into a self-inflicted denial of service on both
+  ends of the connection. A loop with the server's blessing.
+
+  Real servers emit this when the header is templated from a
+  config value that defaults to zero, or when a health-check
+  response leaks into the error path — the Retry-After was meant
+  for a different context, like a sign saying "no waiting" applied
+  to a queue.
+
+  A sensible client treats Retry-After as a minimum, not a target,
+  and adds jitter anyway. A naive one becomes the load it was
+  complaining about — the client equivalent of shouting "why is
+  everyone shouting" at a volume of 10,000 req/s.
+signature:
+  status: 503
+  headers:
+    Retry-After: "0"
+  body: '{"error":"service unavailable","retry_after":0}'
+tags: [rate-limit, headers, retry-storm]

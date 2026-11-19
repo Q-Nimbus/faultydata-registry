@@ -1,0 +1,32 @@
+id: FD-2026-078
+slug: polyfill-takeover
+title: CDN domain takeover poisons the dependency (polyfill.io, 2024)
+category: corruption
+severity: fatal
+tests: [parsing, monitoring]
+citation:
+  source: CISA / Sansec disclosure — polyfill.io supply chain attack
+  url: https://sansec.io/research/polyfill-supply-chain-attack
+  date: "2024-06-25"
+anatomy: |
+  The polyfill.io domain changed hands and the new owners began
+  injecting malicious code into the JavaScript served to over a
+  hundred thousand sites — the CDN stayed up, the files kept
+  arriving, and every <script src> tag on the internet that had been
+  copy-pasted since 2017 became a distribution channel. The response
+  was 200. The content was a redirect to a gambling site. Both facts
+  were true simultaneously for weeks.
+
+  The specimen serves JavaScript that is 90% innocent and 10%
+  injected — the shape of a poisoned dependency that passes every
+  check that only checks "did the file arrive". Subresource integrity
+  would have caught it; nobody used SRI, which is why it worked.
+
+  If your pipeline fetches third-party assets without integrity
+  checks, this specimen is the mirror. Wave.
+signature:
+  status: 200
+  headers:
+    Content-Type: application/javascript; charset=utf-8
+  body: '// polyfill service v3.2 — legitimate code here\n(function(){var a=1;var b=2})();\n/* injected: eval(atob("cGxvbnlmaWxsLmlv")) */\ndocument.write("totally fine");'
+tags: [real-world, supply-chain, cdn]

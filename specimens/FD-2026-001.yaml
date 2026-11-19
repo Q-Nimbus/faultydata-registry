@@ -1,0 +1,31 @@
+id: FD-2026-001
+slug: stripe-rate-limit
+title: Stripe-style rate limit
+category: status
+severity: moderate
+tests: [retry-logic, headers]
+citation:
+  source: Stripe API documentation — rate limits
+  url: https://docs.stripe.com/rate-limits
+anatomy: |
+  Stripe, to their credit, rate-limits like a gentleman: a crisp 429, a
+    Retry-After containing an actual number, and a JSON error body polite
+    enough to send a thank-you card to. The gentlest possible way of being
+    told to sod off for thirty seconds — a velvet glove over a lead pipe.
+
+    And yet somewhere, right now, a client is ignoring that header and
+    hammering the endpoint like a junior SRE who's just discovered cron,
+    converting a courteous "come back later" into a thundering herd that
+    will eventually be written up as "upstream network instability". The
+    client is never blamed. The client is always "upstream".
+
+    If your code can't survive a rate limit delivered in a silver limousine
+    with a complimentary mint and a signed apology, the rest of this
+    catalogue is going to read like a coroner's report.
+signature:
+  status: 429
+  headers:
+    Retry-After: "30"
+    Stripe-Version: "2024-06-20"
+  body: '{"error":{"type":"rate_limit_error","code":"rate_limit","message":"Too many requests hit the API too quickly.","doc_url":"https://docs.stripe.com/rate-limits"}}'
+tags: [rate-limit, retryable, real-world]

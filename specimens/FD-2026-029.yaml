@@ -1,0 +1,31 @@
+id: FD-2026-029
+slug: gitlab-db-deleted
+title: Production database deleted, backups broken (GitLab, Jan 2017)
+category: status
+severity: fatal
+tests: [semantics]
+citation:
+  source: GitLab postmortem of database outage of January 31
+  url: https://about.gitlab.com/blog/2017/02/10/postmortem-of-database-outage-of-january-31/
+  date: "2017-01-31"
+anatomy: |
+  An engineer, trying to fix replication lag, ran rm -rf on the wrong
+    directory on the primary database and deleted ~300GB of production
+    data — and then, in the moment everyone checks the backups, it
+    emerged that five of the six backup systems had been silently failing
+    for ages. Not one backup. Five different backup systems, all broken
+    in five different ways, like a fire safety inspection conducted by
+    arsonists.
+
+    The resource that existed yesterday returns 410 Gone — not 404,
+    which leaves a hopeful little door open, but 410, which is HTTP for
+    "we know exactly where it went and it's not coming back". No amount
+    of refreshing brings it back. People tried. People always try.
+
+    A permanent reminder that untested backups are a bedtime story, not
+    a strategy — and that the scariest part of any disaster is never
+    the disaster. It's the discovery phase.
+signature:
+  status: 410
+  body: '{"error":"gone","message":"The resource was permanently deleted and cannot be recovered"}'
+tags: [real-world, data-loss]

@@ -1,0 +1,33 @@
+id: FD-2026-030
+slug: left-pad
+title: Dependency vanishes from the registry (left-pad, Mar 2016)
+category: status
+severity: severe
+tests: [semantics]
+citation:
+  source: npm blog — kik, left-pad, and npm
+  url: https://blog.npmjs.org/post/141577284765/kik-left-pad-and-npm
+  date: "2016-03-23"
+anatomy: |
+  A developer unpublished an eleven-line string-padding
+    function over a naming dispute, and within minutes half the
+    JavaScript ecosystem couldn't build — Babel, React, Node itself,
+    all face-planted on a dependency the size of a haiku. The registry
+    dutifully returned 404 for a URI that had worked for years. The
+    supply chain turned out to be a single, very short string.
+
+    The horror isn't the dependency — it's the discovery that your
+    build was a house of cards and one of the cards was a function that
+    pads strings with spaces, a function you could have written on a
+    napkin, a function that in some sense you already had.
+
+    Your client sees a registry-shaped 404 with a JSON body. The
+    specimen's real payload is the lesson: pin your dependencies, cache
+    your artifacts, and never build a cathedral on a library named
+    left-pad.
+signature:
+  status: 404
+  headers:
+    Content-Type: application/json
+  body: '{"error":"Not found","reason":"document not found","name":"left-pad"}'
+tags: [real-world, dependency, supply-chain]

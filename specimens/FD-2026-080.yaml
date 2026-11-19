@@ -1,0 +1,24 @@
+id: FD-2026-080
+slug: http09-body-only
+title: HTTP/0.9-style response (body, no status line)
+category: headers
+severity: moderate
+tests: [parsing, semantics]
+anatomy: |
+  The server answers the request with raw body bytes and no status
+  line at all — no "HTTP/1.1 200", no headers, just content, like
+  it's 1991 and nobody's invented metadata yet. HTTP/0.9 lived like
+  this, and a surprising amount of embedded gear, ancient CGI, and
+  hand-rolled socket servers still does.
+
+  Your HTTP client will either classify it as HTTP/0.9 and serve the
+  body (technically correct per spec, spiritually a security incident
+  waiting to happen), reject it as malformed, or panic in a code path
+  nobody's exercised since the library's first commit.
+
+  Delivered raw because no modern framework will produce it — this
+  requires bypassing the entire HTTP stack and writing to the socket
+  by hand, which is also how it happens in the wild.
+signature:
+  raw: '{"result":"ok","note":"no status line was harmed in the making of this response"}'
+tags: [protocol, legacy, parsing]

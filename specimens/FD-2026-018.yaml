@@ -1,0 +1,26 @@
+id: FD-2026-018
+slug: partial-body-stall
+title: Partial body then stall
+category: latency
+severity: severe
+tests: [timeouts]
+anatomy: |
+  The server cheerfully sends 256 bytes of a response it
+    promised would be much larger — Content-Length already committed,
+    mind you, the contract signed in triplicate — then wanders off to
+    do something else, forever. The first chunk arrives. The rest of the
+    body has entered a monastery and taken a vow.
+
+    This is nastier than never-responds, because it looks like progress.
+    A great many clients time out headers diligently, relax into the
+    body-read phase like a man putting his feet up at the dentist, and
+    then wait with the patience of a saint for bytes that have emigrated.
+
+    Watch your streaming handlers especially — the ones that read in a
+    loop and check nothing else. They will sit on that socket like a hen
+    on a marble, convinced that with a little more time, something is
+    bound to hatch.
+signature:
+  status: 200
+  stall_after: 256
+tags: [timeout, streaming, partial]

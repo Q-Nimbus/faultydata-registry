@@ -1,0 +1,22 @@
+id: FD-2026-104
+slug: loop-detected-508
+title: HTTP 508 Loop Detected
+category: status
+severity: trivial
+tests:
+- semantics
+tags:
+- status
+- webdav
+- exotic
+anatomy: "RFC 5842's contribution to the status code menagerie: 508, for\n  when the server detects an\
+  \ infinite loop inside WebDAV property\n  traversal. Almost nothing emits it, almost nothing handles\
+  \ it, and\n  clients that pattern-match \"5xx = retry\" will retry a request whose\n  defining characteristic\
+  \ is that it can never terminate.\n\n  A fine test of whether your error handling reads the status or\
+  \ just\n  the first digit."
+signature:
+  status: 508
+  headers:
+    Content-Type: application/json
+  body: '{"error":"loop_detected","detail":"the resource graph contains a cycle, much like this incident
+    review"}'

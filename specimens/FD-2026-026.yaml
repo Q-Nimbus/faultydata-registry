@@ -1,0 +1,40 @@
+id: FD-2026-026
+slug: google-auth-2020
+title: Global authentication outage (Google, Dec 2020)
+category: composite
+severity: severe
+tests: [auth, retry-logic]
+citation:
+  source: Google Cloud infrastructure components incident 20013
+  url: https://status.cloud.google.com/incident/zall/abr20013
+  date: "2020-12-14"
+anatomy: |
+  Google ran out of quota in its own identity system — the
+    internal service that decides whether tokens are real — and for
+    forty-five minutes Gmail, YouTube, Workspace, all of it, told every
+    credentialed user on Earth that their perfectly good token was
+    rubbish. The bouncer forgot the guest list, then forgot who the
+    bouncer was.
+
+    "Your token is bad" and "the identity plane is on fire" produce the
+    same 401. That's the horror of it: a client cannot distinguish
+    "expired credential" from "the concept of credentials has collapsed".
+    Only one of those is fixed by re-logging in, and the other one will
+    eat your retry budget, your refresh tokens, and eventually your
+    session store while you're doing it.
+
+    Mostly 401s with a garnish of 500s — a composite that says "not only
+    are you not who you say you are, we're not entirely sure we are
+    either". Clients that retry-once-on-401 survive. Clients that retry-
+    aggressively just DDoS'd the thing that's supposed to save them.
+signature:
+  phases:
+    - weight: 70
+      signature:
+        status: 401
+        body: '{"error":{"code":401,"message":"Request had invalid authentication credentials.","status":"UNAUTHENTICATED"}}'
+    - weight: 30
+      signature:
+        status: 500
+        body: '{"error":{"code":500,"message":"Internal error encountered.","status":"INTERNAL"}}'
+tags: [real-world, auth, composite]

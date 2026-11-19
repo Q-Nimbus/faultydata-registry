@@ -1,0 +1,28 @@
+id: FD-2026-069
+slug: unsolicited-304
+title: Unsolicited 304 to an unconditional request
+category: headers
+severity: moderate
+tests: [semantics, headers]
+anatomy: |
+  You sent a plain GET. The server, possessed of a cache with
+  opinions, answered 304 Not Modified — a status that is only legal
+  as an answer to a conditional request you didn't make. No body,
+  because 304s don't have bodies. Your client sent nothing to
+  compare it against; it asked for the data and was told,
+  essentially, "you already have it", when it very much did not.
+
+  This happens in the wild wherever a middlebox "optimizes" caching
+  semantics it doesn't understand — proxies that convert responses,
+  CDN rules that cache by path and ignore request headers, an edge
+  that was configured by someone who'd read half the RFC. Usually
+  half. The half that seemed important.
+
+  Delivered via raw HTTP because most HTTP frameworks refuse to
+  produce it, which is telling. Clients that treat 304 as "use my
+  cache" will use an empty cache — an item that exists, is empty,
+  and is wrong, which is also a description of several enterprise
+  databases.
+signature:
+  raw: "HTTP/1.1 304 Not Modified\r\nContent-Length: 0\r\nX-Fault-Specimen: FD-2026-069\r\n\r\n"
+tags: [cache, headers, status]

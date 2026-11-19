@@ -1,0 +1,40 @@
+id: FD-2026-098
+slug: ba-power-2017
+title: Power surge kills the data centre, recovery kills the airline (British Airways, May 2017)
+category: composite
+severity: fatal
+tests:
+- retry-logic
+- semantics
+citation:
+  source: BBC News
+  url: https://www.bbc.com/news/technology-40069731
+  date: '2017-05-27'
+tags:
+- real-world
+- datacenter
+- recovery
+anatomy: "An engineer disconnected and then reconnected a power supply\n  in a BA data centre, the surge\
+  \ damaged the systems it came back to,\n  and 75,000 passengers spent a bank holiday weekend learning\
+  \ that \"the\n  computer says no\" scales internationally. The initial failure was\n  hardware; the\
+  \ three-day collapse was recovery — systems coming back in\n  the wrong order, returning inconsistent\
+  \ state, needing to be re-killed.\n\n  The signature models the recovery phase: mostly dead, occasionally\n\
+  \  returns something that looks alive but is internally wrong — the\n  zombie window between \"outage\"\
+  \ and \"actually back.\""
+signature:
+  phases:
+  - weight: 60
+    signature:
+      status: 503
+      body: <html><body>site maintenance</body></html>
+      headers:
+        Content-Type: text/html
+  - weight: 25
+    signature:
+      status: 200
+      corrupt: wrong-types
+      body: '{"flight":"BA123","status":"cancelled","gate":null}'
+  - weight: 15
+    signature:
+      status: 200
+      body: '{"flight":"BA123","status":"boarding"}'

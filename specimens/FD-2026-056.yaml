@@ -1,0 +1,29 @@
+id: FD-2026-056
+slug: int64-overflow
+title: Integer overflow in a JSON id
+category: corruption
+severity: moderate
+tests: [parsing]
+anatomy: |
+  The id field is 9223372036854775807 — int64 max, a perfectly valid
+  JSON number that fits nowhere comfortably. JavaScript's Number is
+  a float64, which rounds this to a different integer entirely —
+  the id you stored is not the id you received, it's a nearby id,
+  like a delivery to the wrong flat that insists it's the right one.
+
+  This is how Twitter IDs famously broke JavaScript clients in 2011:
+  tweet IDs exceeded 2^53, JS rounded them, and suddenly everyone's
+  replies pointed at different tweets. The fix — serialize IDs as
+  strings — exists precisely because this happened at scale, in
+  public, to a company with a large API.
+
+  Clients that parse into int64 handle it. Clients that parse into
+  float64 get a number that's off by one or two, which is more than
+  enough to join the wrong records, bill the wrong account, or reply
+  to the wrong tweet. The difference between int64 max and its
+  float64 neighbour is the difference between a database and a
+  disaster.
+signature:
+  status: 200
+  body: '{"id":9223372036854775807,"name":"ada","balance":0.1}'
+tags: [json, types, integer-overflow]

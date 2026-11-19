@@ -1,0 +1,29 @@
+id: FD-2026-057
+slug: drip-feed
+title: Drip-fed response body
+category: latency
+severity: moderate
+tests: [timeouts]
+anatomy: |
+  The response arrives byte by byte, like a ransom note assembled
+  one letter at a time — 1KB of JSON delivered at 128 bytes a
+  second. Not slow in the latency sense; slow in the "the body is
+  still arriving" sense, which is a different and more insidious
+  species of slow.
+
+  This is the signature of a backend streaming a result it hasn't
+  finished computing, or a proxy buffer that's decided to release
+  the response at a rate it considers reasonable. The headers
+  arrived on time. The body is taking the scenic route. Every
+  byte is correct; the delivery schedule is a hostage negotiation.
+
+  Clients that read bodies with no overall deadline will sit here
+  for the full eight seconds — which is nothing, until it's eight
+  seconds times ten thousand concurrent requests, at which point
+  it's a connection pool with no connections left and a pager with
+  a fresh battery.
+expect: [ok, timeout]
+signature:
+  status: 200
+  drip: { bytes_per_second: 128 }
+tags: [latency, streaming]

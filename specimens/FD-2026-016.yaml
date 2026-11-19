@@ -1,0 +1,28 @@
+id: FD-2026-016
+slug: slow-but-correct
+title: Slow but correct response
+category: latency
+severity: moderate
+tests: [timeouts]
+anatomy: |
+  Nothing is wrong. Everything is right. It's just five seconds
+    late — which in distributed-systems time is roughly one geological
+    epoch and change. The response, when it arrives, is perfect: correct
+    status, correct body, headers immaculate. A Michelin meal served by
+    a waiter who took the scenic route through a hedge maze.
+
+    This is the fault that actually takes production down, because nobody
+    alerts on slow. A dependency drags its feet, every caller's timeout —
+    or embarrassing lack of one — gets exercised simultaneously, thread
+    pools fill like a car park on cup final day, and the cascade writes
+    itself in whatever language your services happen to speak.
+
+    If your client has a deadline, this specimen is a light workout.
+    If it doesn't — and many don't, shipped by people who believed
+    "the API is usually fast" constituted a resilience strategy — enjoy
+    watching it discover mortality.
+expect: [ok, timeout]
+signature:
+  status: 200
+  delay: { ms: 5000 }
+tags: [latency, timeout]

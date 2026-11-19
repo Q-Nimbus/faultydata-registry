@@ -1,0 +1,29 @@
+id: FD-2026-087
+slug: empty-200
+title: 200 OK, body never arrived
+category: corruption
+severity: severe
+tests: [parsing, semantics]
+anatomy: |
+  Status line says 200. Content-Type says application/json. Content-Length
+    says nothing, because there isn't one — and there isn't a body either.
+    Just a confident, fully-formed promise of a payload followed by the
+    vast empty auditorium where the payload was supposed to be.
+
+    This is the response your API gives when the handler fell off the end
+    of its own logic — every branch returned early, nobody wrote anything,
+    and net/http politely shipped the blank page. The client asks "did it
+    work?" and the server answers "yes," which is technically true in the
+    same way a shrug is technically an answer.
+
+    Clients split three ways: the ones that json.Unmarshal the void and
+    get a nil map they then dereference into the shadow realm, the ones
+    that treat empty as an empty list and quietly delete the pagination
+    loop's reason to live, and the rare enlightened few that check whether
+    a response body exists before believing in it. Be the third kind.
+signature:
+  status: 200
+  corrupt: empty
+  headers:
+    Content-Type: application/json
+tags: [json, semantics, empty-body]

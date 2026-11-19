@@ -1,0 +1,31 @@
+id: FD-2026-007
+slug: slack-recovery-2021
+title: Recovering outage (Slack, Jan 2021)
+category: sequence
+severity: severe
+tests: [retry-logic]
+citation:
+  source: Slack — 2021-01-04 incident summary
+  url: https://slack.engineering/slacks-outage-on-january-4th-2021/
+  date: "2021-01-04"
+anatomy: |
+  When Slack went down in 2021 and shambled back to life,
+    the recovery was the interesting part: services didn't flip from dead
+    to alive, they staggered upright like a junior developer after the
+    Christmas party — vertical, technically, but in no condition to make
+    promises. First request: 503. Second: 503. Third: also 503. Fourth:
+    fine, actually, what did you want.
+
+    This is where half-open circuit breakers go to be tested. Retry once
+    and surrender? Failure. Retry at a fixed 1ms interval? Congratulations,
+    you've built a hammer that beats on a healing service — the medical
+    equivalent of CPR administered with a mallet. Exponential backoff with
+    jitter, three or four attempts? That's an adult in the room.
+
+    The sequence is deterministic — three refusals then success — because
+    real recovery is deterministic-ish too. The service IS coming back.
+    It's just doing it at its own pace, and it has never once consulted
+    your pager.
+signature:
+  sequence: { fail: 3, status: 503, then: 200 }
+tags: [sequence, real-world, recovery, retryable]

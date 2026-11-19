@@ -1,0 +1,24 @@
+id: FD-2026-101
+slug: infinite-pagination
+title: Infinite pagination cursor
+category: sequence
+severity: moderate
+tests:
+- loops
+- parsing
+tags:
+- pagination
+- loops
+- semantics
+anatomy: "Every page returns a valid next_cursor. Every next page\n  returns another valid next_cursor.\
+  \ The data ran out three pages ago;\n  the cursor did not get the memo. Clients without a termination\n\
+  \  condition will happily paginate into the heat death of the universe,\n  accumulating zero records\
+  \ per page at excellent throughput.\n\n  The real-world version ships whenever someone builds cursors\
+  \ on\n  \"offset + limit\" without checking whether the underlying data moved.\n  Your code's defence:\
+  \ a max-pages guard and the humility to know that\n  \"next\" is a suggestion, not a promise."
+signature:
+  status: 200
+  headers:
+    Content-Type: application/json
+    Link: </r/FD-2026-101?cursor=g3VhcnRlcnM>; rel="next"
+  body: '{"data":[],"next_cursor":"g3VhcnRlcnM","next":"https://faultydata.com/r/FD-2026-101?cursor=g3VhcnRlcnM"}'

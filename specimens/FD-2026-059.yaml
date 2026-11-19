@@ -1,0 +1,43 @@
+id: FD-2026-059
+slug: github-partition-2018
+title: East-west network partition (GitHub, Oct 2018)
+category: composite
+severity: fatal
+tests: [monitoring, retry-logic]
+citation:
+  source: GitHub engineering — October 21 post-incident analysis
+  url: https://github.blog/2018-10-30-oct21-post-incident-analysis/
+  date: "2018-10-21"
+anatomy: |
+  A network maintenance window severed GitHub's east and west coast
+  datacenters for 43 seconds. Forty-three seconds. The orchestrator
+  layer, doing exactly what it was designed to do, promoted a stale
+  MySQL primary on the wrong side of the partition — and the recovery,
+  rebuilding a split-brain database topology by hand, took twenty-four
+  hours of degraded service. Forty-three seconds in, a full day out.
+  The ratio is the incident.
+
+  Client-side it looked like a site that was technically up and
+  spiritually absent: webhooks delayed, pages slow, writes failing —
+  the degraded-everything pattern where nothing is quite broken enough
+  to fail your health check and everything is broken enough to ruin
+  your deploy.
+
+  Composite: elevated latency, intermittent 500s, occasional clean
+  success — the shape of an incident that is "resolved" three times
+  before it is actually resolved, as anyone who has ever watched a
+  status page will recognize in their bones.
+signature:
+  phases:
+    - weight: 40
+      signature:
+        status: 200
+        delay: { ms: 6000, jitter_ms: 2000 }
+    - weight: 40
+      signature:
+        status: 500
+        body: '{"message":"Internal server error"}'
+    - weight: 20
+      signature:
+        status: 200
+tags: [real-world, partition, composite]

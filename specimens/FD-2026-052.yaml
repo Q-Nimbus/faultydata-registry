@@ -1,0 +1,31 @@
+id: FD-2026-052
+slug: jsonp-wrapper
+title: JSONP callback wrapper
+category: corruption
+severity: moderate
+tests: [parsing, headers]
+anatomy: |
+  The response is `callback({...});` — your JSON arrived wearing a
+  function call, because the endpoint's content negotiation decided
+  you wanted JSONP, which is a technology from an era when the same-
+  origin policy was considered more of a suggestion. Every JSON
+  parser dies on the leading 'callback(' the way a dog dies on a
+  fence.
+
+  Found in the wild wherever a legacy API was "REST-ified" without
+  removing the JSONP shim, which is most of the APIs built between
+  2008 and 2014 and a depressing number built since. The Content-Type
+  will say application/javascript, helpfully confirming that what you
+  received is code, not data, and must be executed by a browser or
+  rejected by a parser — your parser chose neither, it just died.
+
+  Correct behaviour: notice the callback wrapper, either strip it and
+  parse the JSON within or refuse on the grounds that you are not a
+  script-tag from 2011. Incorrect behaviour: eval() it. Please do not
+  eval() it. This is a catalogue of failure, not a suggestion box.
+signature:
+  status: 200
+  headers:
+    Content-Type: application/javascript; charset=utf-8
+  body: 'callback({"user":{"id":12345,"name":"ada"},"ok":true});'
+tags: [jsonp, parsing, legacy]

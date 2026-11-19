@@ -1,0 +1,35 @@
+id: FD-2026-067
+slug: geo-block-451
+title: Legally unavailable (HTTP 451, geo-block)
+category: status
+severity: moderate
+tests: [semantics, parsing]
+citation:
+  source: RFC 7725 — An HTTP Status Code to Report Legal Obstacles
+  url: https://www.rfc-editor.org/rfc/rfc7725
+  date: "2015-12-18"
+anatomy: |
+  HTTP 451 — "Unavailable For Legal Reasons", named after the
+  temperature at which paper burns because the RFC authors had a sense
+  of occasion — is the status a server returns when it cannot serve
+  you for regulatory reasons. Most famously: half the American
+  internet simply geo-blocking European visitors after GDPR rather
+  than comply, which remains the most passive-aggressive response to
+  legislation in computing history.
+
+  For a client this is a 4xx that isn't your fault and isn't
+  retryable — a "no" rooted in jurisdiction rather than anything you
+  sent. Clients that retry it are tilting at legislation. Clients
+  that treat all 4xx as "my request was bad" misdiagnose it. The
+  correct response is to log it, geo-check yourself, and move on.
+
+  This specimen serves a 451 with a compliance-shaped HTML body.
+  Your client is not blocked; it is legally excluded, which sounds
+  worse and behaves the same.
+signature:
+  status: 451
+  headers:
+    Content-Type: text/html; charset=utf-8
+    Link: '<https://faultydata.com/legal>; rel="blocked-by"'
+  body: '<html><body><h1>451 Unavailable For Legal Reasons</h1><p>This content is not available in your jurisdiction.</p></body></html>'
+tags: [status, geo-block, rfc]

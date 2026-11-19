@@ -1,0 +1,28 @@
+id: FD-2026-091
+slug: cloudflare-controlplane-2023
+title: Control plane loses its buildings (Cloudflare, Nov 2023)
+category: status
+severity: moderate
+tests:
+- monitoring
+- semantics
+citation:
+  source: Cloudflare blog
+  url: https://blog.cloudflare.com/post-mortem-on-cloudflare-control-plane-and-analytics-outage/
+  date: '2023-11-02'
+tags:
+- real-world
+- control-plane
+- partial-outage
+anatomy: "For four days in November 2023 Cloudflare's edge kept happily\n  serving traffic while its control\
+  \ plane — the dashboard, the APIs, the\n  logging and analytics — faceplanted, because the Flexential\
+  \ data centres\n  hosting it lost power and the \"independent\" control plane turned out to\n  have\
+  \ opinions about which buildings it lived in.\n\n  A gorgeous failure shape: the product works, the\
+  \ management of the\n  product does not. Customers could serve traffic but couldn't configure,\n  observe,\
+  \ or bill it. If your monitoring treats \"the API returns 200\" and\n  \"the API is usable\" as the\
+  \ same check, this is the exhibit that ends\n  that complacency."
+signature:
+  status: 500
+  headers:
+    Content-Type: application/json
+  body: '{"success":false,"errors":[{"code":7003,"message":"control plane unavailable"}],"result":null}'

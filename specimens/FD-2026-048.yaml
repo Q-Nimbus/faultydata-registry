@@ -1,0 +1,33 @@
+id: FD-2026-048
+slug: cloudflare-523
+title: Origin unreachable (Cloudflare 523)
+category: status
+severity: severe
+tests: [semantics, monitoring]
+citation:
+  source: Cloudflare docs — 5xx error reference
+  url: https://developers.cloudflare.com/support/troubleshooting/cloudflare-errors/troubleshooting-cloudflare-5xx-errors/
+anatomy: |
+  The edge is fine. The edge is always fine. It's your origin that's
+  unreachable — the proxy knocked and nobody answered, so it serves
+  its own branded 523 in a friendly HTML page, which your API client
+  receives because intermediaries cannot tell robots from humans and
+  frankly have stopped trying.
+
+  The operational horror: from the client's side, 523 is
+  indistinguishable from "the service has ceased" — but the service
+  is up! It's behind the curtain, working perfectly, unaware it has
+  been pronounced dead by its own bouncer. The failure is between
+  the edge and the origin, in the part of the network nobody on the
+  incident call can see.
+
+  Clients that log status codes get a number the on-call engineer
+  will have to Google — which is half the educational value of this
+  catalogue, really.
+signature:
+  status: 523
+  headers:
+    Server: cloudflare
+    Content-Type: text/html; charset=UTF-8
+  body: '<html><body><h1>Error 523</h1><p>Origin is unreachable</p><p>Cloudflare Ray ID: deadbeef-LHR</p></body></html>'
+tags: [edge, proxy, real-world-pattern]

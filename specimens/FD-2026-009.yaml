@@ -1,0 +1,32 @@
+id: FD-2026-009
+slug: ai-provider-overload
+title: Provider overloaded (OpenAI-style 529)
+category: status
+severity: moderate
+tests: [retry-logic]
+citation:
+  source: OpenAI API — error codes
+  url: https://platform.openai.com/docs/guides/error-codes
+anatomy: |
+  An AI provider at capacity: 503s dressed in the house error format,
+    a body that says "overloaded" with the serene detachment of a maître d'
+    turning away the public. No Retry-After worth the name, no queue
+    position, just vibes and a suggestion to try again later — later being
+    a concept, not a timestamp.
+
+    The trap is the rage-loop. Every retry is another request into a
+    service that's already drowning, so your client's survival instinct is
+    literally the thing making it worse — like a drowning man whose
+    flailing is billed per stroke. Exponential backoff or circuit-break,
+    anything else is a donation.
+
+    Clients that treat 503 as "wait and try again politely" survive.
+    Clients that treat it as "the button didn't work, press it harder"
+    become part of the load they were complaining about. There's a Zen
+    koan in there somewhere, and it's on fire.
+signature:
+  status: 503
+  headers:
+    Retry-After: "15"
+  body: '{"error":{"message":"The engine is currently overloaded, please try again later","type":"server_error","code":"overloaded"}}'
+tags: [real-world, llm, retryable]

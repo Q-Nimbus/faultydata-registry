@@ -1,0 +1,27 @@
+id: FD-2026-017
+slug: never-replies
+title: Connection accepted, never replies
+category: latency
+severity: severe
+tests: [timeouts]
+anatomy: |
+  The TCP handshake completes beautifully and then — silence.
+    No response, no reset, no closure. Just a socket held open like a
+    door in a horror film, with something on the other side that has
+    simply decided not to speak. The connection is alive. The conversation
+    is not. It is the HTTP equivalent of being left on read by a load
+    balancer.
+
+    Clients with only a connect timeout — a surprisingly popular
+    configuration, usually written by someone who read half a blog post —
+    will wait here until the heat death of the universe or OOM, whichever
+    arrives first. Both are scheduled. Neither will send a notification.
+
+    Server-capped at sixty seconds, which is still longer than most
+    incident calls and roughly the attention span of a goat at a corporate
+    mindfulness retreat. If your client gives up before the server does,
+    it passes. If it out-waits the server, someone needs to have a quiet
+    word with whoever owns the timeout budget.
+signature:
+  hang: true
+tags: [timeout, hang]

@@ -1,0 +1,28 @@
+id: FD-2026-081
+slug: dies-mid-headers
+title: Response dies mid-headers
+category: headers
+severity: severe
+tests: [timeouts, parsing]
+anatomy: |
+  The response begins — status line, part of a header — and then the
+  connection closes. "Content-T" and then nothing, forever. Not a
+  truncated body; a truncated envelope, the TCP equivalent of a
+  letter arriving with the corner torn off before you can see who
+  it's from.
+
+  This is what a backend crash between "headers committed" and
+  "headers sent" looks like from the wire's perspective — the proxy
+  got half a response and the rest is in the postmortem. Happens at
+  the seam between frameworks and servers, which is why it never
+  happens in your test environment.
+
+  Clients that read until connection close get a parse error at a
+  byte offset, not a status code. Clients that wait for complete
+  headers get a timeout that attributes itself to the network. Either
+  way, the answer is the same: the response never completed, and
+  your error handling has to know that "never completed" is a status
+  too.
+signature:
+  raw: "HTTP/1.1 200 OK\r\nContent-T"
+tags: [protocol, truncation, crash]

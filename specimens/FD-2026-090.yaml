@@ -1,0 +1,42 @@
+id: FD-2026-090
+slug: cloudflare-backbone-2020
+title: Backbone congestion black hole (Cloudflare, Jul 2020)
+category: composite
+severity: severe
+tests:
+- timeouts
+- monitoring
+citation:
+  source: Cloudflare blog
+  url: https://blog.cloudflare.com/cloudflare-outage-on-july-17-2020/
+  date: '2020-07-17'
+tags:
+- real-world
+- routing
+- partial-outage
+anatomy: "A misconfigured router in Atlanta announced routes it had no\n  business announcing, traffic\
+  \ got sucked into a backbone that couldn't\n  hold it, and for twenty-seven minutes Cloudflare — a company\
+  \ whose\n  entire job is being reachable — was not. The postmortem's memorable\n  detail: some of their\
+  \ own status infrastructure lived behind the same\n  congested paths, so for a while even the \"we are\
+  \ investigating\" page\n  needed investigating.\n\n  The signature is partial reachability: some requests\
+  \ get through, some\n  get eaten, and the client cannot tell the difference between \"the site\n  is\
+  \ down\" and \"the road to the site is down\" — because there isn't one."
+signature:
+  phases:
+  - weight: 45
+    signature:
+      status: 502
+      body: <html><body>502 Bad Gateway</body></html>
+      headers:
+        Content-Type: text/html
+  - weight: 30
+    signature:
+      status: 504
+      delay:
+        ms: 3000
+        jitter_ms: 2000
+      body: upstream timeout
+  - weight: 25
+    signature:
+      status: 200
+      body: '{"status":"through — this time"}'

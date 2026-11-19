@@ -1,0 +1,38 @@
+id: FD-2026-093
+slug: optus-routing-2023
+title: Routing-table overload blackout (Optus, Nov 2023)
+category: composite
+severity: severe
+tests:
+- timeouts
+- retry-logic
+citation:
+  source: Wikipedia
+  url: https://en.wikipedia.org/wiki/Optus
+  date: '2023-11-08'
+tags:
+- real-world
+- routing
+- bgp
+anatomy: "A routine software upgrade at an upstream peer flooded Optus's\n  routers with more BGP route\
+  \ announcements than their safety limits\n  allowed, the routers did the sensible thing and shut down\
+  \ to protect\n  themselves, and ten million Australians woke up to a carrier that had\n  collectively\
+  \ decided to take the day off. Roughly twelve hours for a\n  full recovery.\n\n  From the client's side\
+  \ it presents as degraded-to-dead: long pauses,\n  intermittent 503s, occasional silence. The network\
+  \ equivalent of a fuse\n  that blows every time you fix it."
+signature:
+  phases:
+  - weight: 50
+    signature:
+      status: 503
+      body: upstream overloaded
+  - weight: 30
+    signature:
+      status: 503
+      delay:
+        ms: 6000
+        jitter_ms: 2000
+      body: route convergence in progress
+  - weight: 20
+    signature:
+      hang: true

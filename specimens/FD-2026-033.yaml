@@ -1,0 +1,31 @@
+id: FD-2026-033
+slug: twitter-rate-limit-2023
+title: Sudden platform rate limit (Twitter/X API, 2023)
+category: status
+severity: moderate
+tests: [retry-logic]
+citation:
+  source: Twitter API changes and rate limiting, early 2023
+  url: https://developer.twitter.com/en/docs/twitter-api
+  date: "2023-02-02"
+anatomy: |
+  One morning the API decided everyone was now on a much
+    smaller plan — undocumented limits, vague error bodies, no
+    consistent Retry-After, and a decade of third-party apps discovering
+    their quota had evaporated overnight, like a pub changing its happy
+    hour by simply removing the chairs. Not a bug. A business decision.
+    Your client cannot tell the difference, which is rather the point.
+
+    The 429 here is hard and curt: RFC 7807 problem-details JSON if
+    you're lucky, nothing useful if you're not. No warning, no grace
+    period, no migration path — the API equivalent of a landlord
+    changing the locks and mailing you the new rate card.
+
+    Backoff strategies tuned for honest rate limiters — the kind that
+    say "try again in 30" — do nothing here because there is no 30.
+    There is only the limit, unspecified, possibly different tomorrow,
+    a bit like life.
+signature:
+  status: 429
+  body: '{"title":"Too Many Requests","detail":"Too Many Requests","type":"about:blank","status":429}'
+tags: [real-world, rate-limit]

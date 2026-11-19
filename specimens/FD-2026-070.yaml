@@ -1,0 +1,27 @@
+id: FD-2026-070
+slug: content-length-lies
+title: Content-Length lies (body shorter than declared)
+category: headers
+severity: severe
+tests: [timeouts, parsing]
+anatomy: |
+  Content-Length says 2048. The body is 64 bytes. The server has
+  already closed its side of the deal — or at least stopped talking —
+  and your client is now waiting for 1984 bytes that were described,
+  promised, and never produced. Like a removal van that arrives with
+  one box, says "rest's coming", and drives off into a field.
+
+  Delivered via raw socket write because honest HTTP stacks refuse
+  to lie at the protocol level — this requires bypassing the entire
+  civilized layer of the stack, which is also how it happens in
+  production: a proxy truncates, a stream aborts, a backend crashes
+  mid-write with the header already committed.
+
+  Clients that read until Content-Length will hang until their read
+  deadline fires — if they have one. Clients that read-until-close
+  get a truncated document and must decide whether partial data is
+  better than no data, which is a product decision disguised as a
+  read loop.
+signature:
+  raw: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 2048\r\nX-Fault-Specimen: FD-2026-070\r\n\r\n{\"truncated\":true,\"note\":\"the other 1984 bytes never arrived\"}"
+tags: [headers, truncation, protocol]

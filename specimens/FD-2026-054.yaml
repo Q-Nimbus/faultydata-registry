@@ -1,0 +1,34 @@
+id: FD-2026-054
+slug: stale-cache
+title: Stale cache serving yesterday's answer
+category: headers
+severity: moderate
+tests: [semantics, monitoring]
+anatomy: |
+  The response is 200, well-formed, correctly typed — and wrong. A
+  cache layer served a response that's twenty-four hours old, the
+  Age header is right there admitting it, and nothing about the
+  bytes tells you the data is a museum exhibit. The origin updated
+  yesterday. The cache didn't get the memo. The memo is what the
+  cache serves.
+
+  This is the stealth fault: nothing looks broken, because nothing
+  is broken — mechanically. The failure is semantic, temporal, a
+  lie told by omission at the layer between your client and the
+  truth. Clients that ignore Age, X-Cache, and Last-Modified will
+  cheerfully consume history as fact. Clients that respect them get
+  the answer to a question someone asked yesterday.
+
+  The specimen serves a valid body stamped with Age: 86400. If your
+  client doesn't notice, it just joined the long and honourable
+  tradition of systems confidently acting on stale data — the same
+  tradition responsible for at least one airline pricing fiasco
+  and innumerable "it says it's in stock" support tickets.
+signature:
+  status: 200
+  headers:
+    Age: "86400"
+    X-Cache: "HIT"
+    Cache-Control: "max-age=900"
+  body: '{"status":"operational","updated_at":"yesterday, technically"}'
+tags: [cache, stale, semantics]

@@ -1,0 +1,25 @@
+id: FD-2026-105
+slug: cloudflare-520
+title: HTTP 520 — the Cloudflare unknown-error junk drawer
+category: status
+severity: moderate
+tests:
+- monitoring
+- semantics
+tags:
+- status
+- cloudflare
+- edge
+anatomy: "A status code Cloudflare invented because the real upstream\n  did something so weird there\
+  \ was no number for it — empty responses,\n  malformed headers, connections that reset mid-handshake.\
+  \ The 5xx\n  bucket's junk drawer: officially \"unknown error,\" colloquially \"the\n  origin did a\
+  \ thing and we're not explaining it.\"\n\n  Clients see it constantly in the wild and handle it badly,\
+  \ because\n  it's not in any RFC and half the retry libraries don't classify it\n  as retryable. Spoiler:\
+  \ it's a 5xx. It is extremely retryable."
+signature:
+  status: 520
+  headers:
+    Content-Type: text/html
+    Server: cloudflare
+    CF-RAY: 8f00beef-LHR
+  body: <html><body><h1>520</h1><p>Web server is returning an unknown error</p></body></html>

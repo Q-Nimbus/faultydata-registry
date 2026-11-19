@@ -1,0 +1,29 @@
+id: FD-2026-076
+slug: date-skew
+title: Date header from the distant past
+category: headers
+severity: trivial
+tests: [headers, semantics]
+anatomy: |
+  The Date header says 1998. The response is fine, the body is fine,
+  the data is current — but the server's clock thinks it's the year
+  of the Tamagotchi, and every cache decision your client makes from
+  this Date will be wrong by a quarter of a century. Freshness
+  calculations go negative. Expiry math produces the Pliocene.
+
+  Clock skew on the server side is depressingly common — VMs that
+  resume from snapshots, containers without NTP, embedded devices
+  counting time since an epoch nobody remembers choosing. The
+  response is honest in every way except temporally.
+
+  Clients that trust the Date header for cache validation will either
+  cache this response forever or discard everything as prehistoric —
+  both wrong, both confident. The correct move is comparing server
+  Date to local time and distrusting deltas that span decades, which
+  is also solid advice for humans.
+signature:
+  status: 200
+  headers:
+    Date: "Mon, 02 Nov 1998 00:00:00 GMT"
+  body: '{"status":"operational","served_at":"now-ish"}'
+tags: [headers, clock-skew, cache]

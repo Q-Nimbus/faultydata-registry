@@ -1,0 +1,26 @@
+id: FD-2026-011
+slug: truncated-json
+title: Truncated JSON body
+category: corruption
+severity: moderate
+tests: [parsing]
+anatomy: |
+  The response ends mid-object, mid-string, mid-thought — a JSON body
+    that simply stops, like a phone call into a tunnel. Content-Length
+    promised more; the socket delivered less; what you got was the first
+    40% of a perfectly good payload followed by the digital equivalent of
+    a dial tone.
+
+    Every parser handles this differently, and every difference is a bug
+    report. Some throw. Some return partial objects — the truly sinister
+    outcome, where the first three fields of a ten-field record look
+    perfectly healthy and get committed to a database with the quiet
+    confidence of a man walking off a cliff he can't see.
+
+    Your options: validate the whole envelope before trusting any of its
+    contents, or become the kind of person who explains to an auditor why
+    half the records in the ledger are haikus.
+signature:
+  status: 200
+  corrupt: truncate
+tags: [json, parser]

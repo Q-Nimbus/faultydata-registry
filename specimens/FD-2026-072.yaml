@@ -1,0 +1,29 @@
+id: FD-2026-072
+slug: wrong-confirmation
+title: Success response confirming the wrong values
+category: corruption
+severity: severe
+tests: [semantics, parsing]
+anatomy: |
+  You sent amount=100, currency=USD. The response is a cheerful 200
+  confirming amount=10000, currency=USD — order of magnitude off,
+  field order shuffled, a value that resembles yours the way a
+  ransom note resembles a grocery list. The API heard you. It heard
+  you wrong, and it confirmed confidently.
+
+  Knight Capital lost $440 million in 45 minutes to a deploy that
+  routed orders to dead test code — not an error response, a wrong
+  response, confirmed successfully at machine speed. The most
+  expensive class of bug in existence: not "it failed" but "it
+  succeeded incorrectly", which only gets discovered by the market,
+  the auditors, or the front page.
+
+  Clients that log the request but not the echoed confirmation will
+  reconcile at month-end and find a discrepancy that no error log
+  explains — because nothing errored. The specimen confirms the
+  wrong amount. Whether your client notices the echo is the entire
+  exam.
+signature:
+  status: 200
+  body: '{"confirmed":true,"order_id":"ORD-88231","amount":10000,"currency":"USD","note":"you sent 100"}'
+tags: [real-world, semantics, financial]

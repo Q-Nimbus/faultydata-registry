@@ -1,0 +1,31 @@
+id: FD-2026-020
+slug: redirect-loop
+title: Infinite redirect loop
+category: redirect
+severity: moderate
+tests: [loops, retry-logic]
+anatomy: |
+  This endpoint, when asked where the resource is,
+    confidently points at itself. Where is it? Here. And where is here?
+    Also here. A redirect Möbius strip — the HTTP equivalent of a
+    receptionist who keeps directing you to her own desk with increasing
+    enthusiasm.
+
+    Every HTTP client has a redirect limit precisely because someone,
+    somewhere, shipped this into production and got paged about it. curl
+    gives up at 50. Browsers tap out around 20 with a page that says
+    "this page isn't redirecting properly", which is true in the way that
+    a house fire is a heating issue. Your hand-rolled fetch wrapper, the
+    one written by a junior data engineer during what can only be
+    described as a corporate goat-herding retreat for the soul? Never.
+    It will follow forever, burning a hole through both ends of the pipe
+    and billing you for the privilege.
+
+    The specimen: one Location header, pointing home, forever. Bring your
+    own exit condition.
+signature:
+  status: 302
+  headers:
+    Location: /r/FD-2026-020
+  body: '{"redirect":"/r/FD-2026-020"}'
+tags: [redirect, loop]

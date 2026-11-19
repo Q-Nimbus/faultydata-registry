@@ -1,0 +1,34 @@
+id: FD-2026-004
+slug: github-secondary-rate-limit
+title: GitHub secondary rate limit
+category: status
+severity: moderate
+tests: [retry-logic, semantics]
+citation:
+  source: GitHub REST API docs — secondary rate limits
+  url: https://docs.github.com/en/rest/guides/best-practices-for-integrators#dealing-with-secondary-rate-limits
+anatomy: |
+  GitHub's secondary rate limit is a 403, not a 429 — the API
+    equivalent of being ejected through the kitchen door while the front of
+    house insists nothing happened. A Retry-After that sometimes shows up,
+    sometimes lies, and a body that politely declines to explain what you
+    did wrong. It's a restraining order written by a lawyer with a sense
+    of humour.
+
+    "Abuse detection" is doing the judging, and the definition of abuse is
+    entirely theirs — parallel requests, enthusiastic polling, scrapers
+    doing scraper things. Your client did nothing wrong. It merely did
+    nothing wrong at scale, which is the same thing.
+
+    Code that only handles 429 sails straight past this, files it under
+    "permissions problem", and pages someone at 4am who will stare at the
+    response like a man reading a suicide note written in his own
+    handwriting. The docs technically mentioned it. On a page nobody
+    finished reading.
+signature:
+  status: 403
+  headers:
+    Retry-After: "60"
+    X-RateLimit-Remaining: "0"
+  body: '{"message":"You have exceeded a secondary rate limit. Please wait a few minutes before you try again.","documentation_url":"https://docs.github.com/en/rest/overview/resources-in-the-rest-api#secondary-rate-limits"}'
+tags: [rate-limit, real-world, retryable]

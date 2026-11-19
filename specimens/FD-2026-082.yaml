@@ -1,0 +1,27 @@
+id: FD-2026-082
+slug: response-splitting
+title: Two responses, one connection (response splitting)
+category: headers
+severity: severe
+tests: [parsing, semantics]
+anatomy: |
+  One request, two responses back-to-back on the socket — the second
+  one smuggled behind the first like a fake ID tucked inside a real
+  wallet. HTTP response splitting: user input containing CRLF ends
+  up in a header, the response gets cut in two, and the client —
+  which asked for one response — gets two and must decide which
+  gospel to believe.
+
+  This is an actual attack primitive, not just a parsing quirk:
+  poison the second response, and a downstream cache stores your
+  version under someone else's URL. The polite version, replayed
+  here, is two well-formed responses for the price of one — a 200
+  and a 500 sharing a connection.
+
+  Clients that read one response and close are safe. Clients that
+  pipeline or reuse connections will encounter the smuggled response
+  as the answer to their NEXT request, which is where the fun —
+  legally distinct from the good kind — begins.
+signature:
+  raw: "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: 28\r\nX-Fault-Specimen: FD-2026-082\r\n\r\n{\"ok\":true,\"which\":\"first\"}HTTP/1.1 500 Internal Server Error\r\nContent-Type: application/json\r\nContent-Length: 34\r\n\r\n{\"ok\":false,\"which\":\"smuggled\"}"
+tags: [protocol, security, response-splitting]

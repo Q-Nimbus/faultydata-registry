@@ -1,0 +1,27 @@
+id: FD-2026-042
+slug: cursor-loop
+title: Pagination cursor that never terminates
+category: corruption
+severity: moderate
+tests: [loops, parsing]
+anatomy: |
+  Every response hands back a next_cursor pointing at
+    itself — the off-by-one that turns "while next is not null" into an
+    infinite self-fetching loop, billing both ends forever. The API is
+    not broken. It is returning a perfectly valid page that happens to
+    be the same page, again, like a lift whose doors open onto the same
+    floor every time.
+
+    A polite paginator bounds pages or detects a cycle — has seen this
+    before, probably in its own code, and learned humility. An impolite
+    one learns about it from the invoice, or from the rate limiter,
+    which will show up eventually like a bailiff with a 429.
+
+    The specimen: two items, one self-referential cursor, and an
+    education in loop invariants. Your client either notices it's seen
+    this page before or it doesn't, and the difference between those
+    two clients is measured in dollars per hour.
+signature:
+  status: 200
+  body: '{"items":[{"id":1,"name":"ada"},{"id":2,"name":"bo"}],"next_cursor":"same","next":"/r/FD-2026-042"}'
+tags: [pagination, loop]

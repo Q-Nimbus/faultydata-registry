@@ -1,0 +1,32 @@
+id: FD-2026-062
+slug: tsb-migration
+title: Migration returns other customers' data (TSB, Apr 2018)
+category: corruption
+severity: fatal
+tests: [parsing, semantics]
+citation:
+  source: UK Parliament Treasury Committee report on TSB IT failure
+  url: https://publications.parliament.uk/pa/cm201719/cmselect/cmtreasy/1749/174902.htm
+  date: "2018-04-23"
+anatomy: |
+  TSB migrated 1.3 billion customer records to a new platform over a
+  weekend and discovered on Monday that the migration had gone
+  catastrophically sideways — customers logging in were shown OTHER
+  customers' accounts. Not an error page: a perfectly rendered
+  dashboard containing a stranger's balance, which is a data breach
+  wearing a UI. Weeks to fix, millions in compensation, a CEO gone.
+
+  The specimen models the client-visible shape: a 200, a valid
+  response, correct schema — and somebody else's data in it. Every
+  field parses. Nothing is technically "wrong" except the contents.
+  There is no status code for "this is a different human".
+
+  This is the hardest class in the catalogue to defend against,
+  because the only defense is noticing — checksums, sanity bounds,
+  "why does user 12345 have a different name than yesterday". Clients
+  that validate structure pass. Clients that validate identity, and
+  there are few, pass harder.
+signature:
+  status: 200
+  body: '{"account":"GB29NWBK60161331926819","name":"NOT-YOUR-NAME","balance":99999.99,"note":"this is somebody else\u0027s account"}'
+tags: [real-world, data-leak, migration]

@@ -1,0 +1,40 @@
+id: FD-2026-060
+slug: gcp-congestion-2019
+title: Network congestion cascade (Google Cloud, Jun 2019)
+category: composite
+severity: severe
+tests: [retry-logic, timeouts]
+citation:
+  source: Google Cloud incident 19009 — June 2, 2019
+  url: https://status.cloud.google.com/incident/cloud-networking/19009
+  date: "2019-06-02"
+anatomy: |
+  A config change meant for a handful of servers was applied to a
+  great many more, network capacity in the eastern US collapsed, and
+  for four hours YouTube, Gmail, and a meaningful slice of everything
+  built on GCP — including, delightfully, several companies whose
+  entire pitch was "we're not on GCP" — degraded in unison. Turns out
+  everyone is on GCP, spiritually.
+
+  The signature is congestion, not death: requests that succeed after
+  a geological delay, requests that fail fast, requests that succeed
+  normally, interleaved with no pattern a health check can summarize.
+  It is the failure mode where "is it up?" is the wrong question and
+  "is it worth waiting for?" is the right one.
+
+  Your client either has a latency budget or it has faith. This
+  specimen tests which.
+signature:
+  phases:
+    - weight: 45
+      signature:
+        status: 200
+        delay: { ms: 7000, jitter_ms: 4000 }
+    - weight: 35
+      signature:
+        status: 503
+        body: '<html><body><h1>503 Service Unavailable</h1></body></html>'
+    - weight: 20
+      signature:
+        status: 200
+tags: [real-world, composite, gcp]

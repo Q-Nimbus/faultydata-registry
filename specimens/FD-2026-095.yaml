@@ -1,0 +1,28 @@
+id: FD-2026-095
+slug: xz-backdoor-2024
+title: Sleeper payload in a trusted release (xz/liblzma, Mar 2024)
+category: corruption
+severity: fatal
+tests:
+- semantics
+- parsing
+citation:
+  source: Wikipedia
+  url: https://en.wikipedia.org/wiki/XZ_Utils_backdoor
+  date: '2024-03-29'
+tags:
+- real-world
+- supply-chain
+- backdoor
+anatomy: "A pseudonymous maintainer spent two years earning commit rights\n  to xz — compression software\
+  \ sitting inside half the world's Linux\n  installs — then slipped a remote-execution backdoor into\
+  \ the release\n  tarballs. Caught by accident when Andres Freund noticed SSH taking\n  half a second\
+  \ too long, roughly a week before it would've shipped into\n  every stable distro. The CVSS score was\
+  \ a perfect 10.\n\n  The signature is terrifying in its politeness: a completely valid\n  response,\
+  \ correct schema, correct version — plus one field that\n  shouldn't exist, patiently waiting for a\
+  \ client that never inspects\n  what it accepts."
+signature:
+  status: 200
+  headers:
+    Content-Type: application/json
+  body: '{"package":"liblzma","version":"5.6.1","signature":"valid","checksum":"verified","ifunc_resolver":"_init"}'

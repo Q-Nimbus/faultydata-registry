@@ -1,0 +1,32 @@
+id: FD-2026-043
+slug: ovh-fire
+title: Datacenter literally on fire (OVH, Mar 2021)
+category: latency
+severity: fatal
+tests: [timeouts, monitoring]
+citation:
+  source: OVHcloud incident report — SBG2 fire
+  url: https://corporate.ovhcloud.com/en-gb/newsroom/pr/information-regarding-the-fire-in-our-strasbourg-site/
+  date: "2021-03-10"
+anatomy: |
+  The SBG2 datacenter in Strasbourg caught fire and burned to the
+  ground, taking SBG1 with it — 3.6 million websites offline, backups
+  stored in the same building as the things they backed up, which is a
+  disaster-recovery strategy best described as "optimistic". Rust,
+  cryptocurrency exchanges, government portals: all converted to ash at
+  roughly the same temperature.
+
+  From a client's perspective this is the purest failure in the
+  catalogue: no status, no body, no hang, no apology. The connection
+  is accepted and then the socket dies mid-sentence — because the
+  something on the other end is no longer metaphorically unreachable.
+  It is materially, chemically unreachable.
+
+  Clients that treat connection-reset as transient will retry into the
+  void forever. Clients that distinguish "service is broken" from
+  "service is now a crime scene" and failover accordingly will survive.
+  This specimen slams the socket on you, precisely the way the fire
+  department would have wanted.
+signature:
+  reset: true
+tags: [real-world, datacenter, catastrophe]

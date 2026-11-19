@@ -1,0 +1,30 @@
+id: FD-2026-041
+slug: retry-after-date
+title: Retry-After as HTTP-date
+category: headers
+severity: trivial
+tests: [headers, retry-logic, parsing]
+anatomy: |
+  RFC 7231 permits Retry-After as delta-seconds OR an
+    HTTP-date. Most backoff logic does int() on it and explodes the
+    first time an API returns an actual date — like this one, which is
+    implausibly far in the future because if you're going to test a
+    parser you may as well test it with a date from a different decade.
+
+    "Sun, 01 Jan 2034" is legal. Perfectly valid. Your int("Sun, 01
+    Jan...") disagrees. Somewhere a client computed a retry delay of
+    300 million seconds and scheduled a retry for a year none of us
+    will be working in — the scheduler did not error, it merely
+    complied, which is what makes schedulers terrifying.
+
+    The specimen tests whether your backoff parses the full spec or the
+    half of it you remembered. Also whether it sanity-checks the
+    resulting delay, because a Retry-After measured in geological time
+    should probably be treated as "this endpoint is done with you"
+    rather than a literal instruction.
+signature:
+  status: 503
+  headers:
+    Retry-After: "Sun, 01 Jan 2034 00:00:00 GMT"
+  body: '{"error":"service unavailable","retry_after":"2034-01-01T00:00:00Z"}'
+tags: [headers, rate-limit, parsing]

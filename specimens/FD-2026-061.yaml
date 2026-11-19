@@ -1,0 +1,35 @@
+id: FD-2026-061
+slug: cloudbleed
+title: Memory leak served in responses (Cloudbleed, Feb 2017)
+category: corruption
+severity: fatal
+tests: [parsing, monitoring]
+citation:
+  source: Cloudflare — incident report on memory leak caused by parser bug
+  url: https://blog.cloudflare.com/incident-report-on-memory-leak-caused-by-cloudflare-parser-bug/
+  date: "2017-02-23"
+anatomy: |
+  A buffer overrun in Cloudflare's HTML parser leaked uninitialized
+  memory into served pages — session cookies, API keys, passwords,
+  fragments of other people's HTTPS traffic, appended to responses
+  like a free gift nobody ordered. For months it bled into cached
+  pages that search engines dutifully indexed, meaning the leak has a
+  permanent public archive. Named Cloudbleed, because the industry
+  can never resist a portmanteau.
+
+  The truly horrible part for clients: the response is YOUR response,
+  correct and well-formed — plus someone else's data appended to it,
+  silently. Not an error. A donation. Every parser that validates
+  "is this JSON" will reject the trailing garbage; every parser that
+  stops at the first valid document will ingest it unnoticed, which is
+  worse.
+
+  This specimen serves a valid body followed by a fragment of leaked
+  session data. What your client does with the extra bytes — reject,
+  ignore, or store in a database where an auditor will eventually
+  find it — says everything about its validation discipline.
+signature:
+  status: 200
+  body: '{"user":{"id":12345,"name":"ada"},"ok":true}'
+  corrupt: leak
+tags: [real-world, security, memory-leak]

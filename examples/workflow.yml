@@ -1,0 +1,14 @@
+name: faultydata
+on: [push, pull_request]
+jobs:
+  resilience:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # grade the example client; swap `client:` for your own command
+      - uses: Q-Nimbus/faultydata-registry@v1
+        with:
+          suite: starter
+          name: example urllib client
+          min-score: "70"
+          client: python3 examples/http_check.py

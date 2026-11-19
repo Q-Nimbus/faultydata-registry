@@ -1,0 +1,38 @@
+id: FD-2026-002
+slug: fastly-2021
+title: CDN edge degradation (Fastly, June 2021)
+category: composite
+severity: severe
+tests: [retry-logic, monitoring]
+citation:
+  source: Fastly summary of June 8 outage
+  url: https://www.fastly.com/blog/summary-of-june-8-outage
+  date: "2021-06-08"
+anatomy: |
+  On the 8th of June 2021, a dormant bug in Fastly's code woke up,
+    stretched, and took down what felt like half the visible internet.
+    Amazon, Reddit, GOV.UK, the New York Times — all simultaneously replaced
+    by whatever error page a CDN picks when it has stopped picking. One
+    customer deploying a perfectly valid config triggered it. One. Like a
+    butterfly flapping its wings, if the butterfly had root access.
+
+    The interesting bit isn't the bug, it's the blast radius. Thousands of
+    perfectly healthy origin servers sat there, innocent as lambs, while the
+    layer in front of them turned to soup. Your uptime was immaculate. Your
+    availability was somebody else's YAML file.
+
+    This specimen models the degraded phase: mostly errors, the occasional
+    success — just enough signal to keep your retry logic hopeful and your
+    load balancer flapping like a deckchair in a hurricane. Arguably worse
+    than total death, because now the incident call has *options* to argue
+    about.
+signature:
+  phases:
+    - weight: 85
+      signature:
+        status: 503
+        body: '{"error":"Error 503 Service Unavailable","detail":"Varnish cache server"}'
+    - weight: 15
+      signature:
+        status: 200
+tags: [composite, real-world, degradation]

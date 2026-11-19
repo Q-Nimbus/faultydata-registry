@@ -1,0 +1,34 @@
+id: FD-2026-065
+slug: psn-2011
+title: Indefinite maintenance page (PlayStation Network, Apr 2011)
+category: status
+severity: fatal
+tests: [retry-logic, semantics]
+citation:
+  source: Sony — PlayStation Network outage official statement, April 2011
+  url: https://blog.playstation.com/2011/04/22/update-on-playstation-network-qriocity-services/
+  date: "2011-04-20"
+anatomy: |
+  An intrusion forced Sony to take PSN offline, and it stayed offline
+  for twenty-three days — not a blip, a full billing cycle. Seventy-
+  seven million accounts' worth of personal data walked out the door
+  while users stared at a maintenance page that said, in effect,
+  "technical difficulties, back soon" for three and a half weeks.
+  "Soon" did a lot of work in that sentence.
+
+  The signature is a polite 503 with a maintenance HTML body — the
+  calmest possible face over a catastrophe, which is exactly how real
+  extended outages present. No error details, no ETA, no admission
+  that "soon" means "we're rebuilding the entire trust model".
+
+  Clients that retry maintenance pages on a fixed schedule survive
+  fine and learn nothing. Clients that distinguish "transient fault"
+  from "the service has entered a period of reflection" and degrade
+  gracefully are the ones worth having. Twenty-three days is a long
+  time to keep a retry loop warm.
+signature:
+  status: 503
+  headers:
+    Retry-After: "3600"
+  body: '<html><body><h1>Maintenance</h1><p>We are currently performing maintenance. Thank you for your patience.</p></body></html>'
+tags: [real-world, outage, maintenance]

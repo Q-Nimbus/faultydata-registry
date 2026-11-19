@@ -1,0 +1,36 @@
+id: FD-2026-028
+slug: crowdstrike-channel-file
+title: Malformed channel file update (CrowdStrike, Jul 2024)
+category: corruption
+severity: fatal
+tests: [parsing]
+citation:
+  source: CrowdStrike root cause analysis — Channel File 291
+  url: https://www.crowdstrike.com/wp-content/uploads/2024/08/Channel-File-291-Incident-Root-Cause-Analysis-08.06.2024.pdf
+  date: "2024-07-19"
+anatomy: |
+  Lock, stock, and two smoking channel files: an update
+    shipped a structurally valid C-00000291*.sys whose contents drove
+    the sensor's renderer out of bounds — the file's own validator said
+    "looks fine", the kernel disagreed, and 8.5 million machines
+    bluescreened in what remains, so far, the GOAT of faulty data.
+    Somewhere a validator is still being blamed for this, and rightly
+    so.
+
+    The elegance is in the layering: the file passed every check it was
+    subjected to. The bug lived in the check, like a customs inspector
+    who is also the smuggler. Valid format, fatal contents — the
+    platonic ideal of "it's not corrupted, it's just wrong".
+
+    This specimen serves the exhibit itself: a null-padded payload for
+    pipelines that need to spot "structurally valid but semantically
+    murderous" before it reaches anything with a kernel. If your
+    pipeline ingests this and calls it healthy, congratulations, you
+    are now part of the postmortem genre.
+signature:
+  status: 200
+  headers:
+    Content-Type: application/octet-stream
+    Content-Disposition: attachment; filename="C-00000291-00000000-00000038.sys"
+  corrupt: zeros
+tags: [real-world, data-corruption, update]

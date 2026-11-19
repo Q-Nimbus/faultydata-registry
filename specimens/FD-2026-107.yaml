@@ -1,0 +1,35 @@
+id: FD-2026-107
+slug: slow-response-stream
+title: Slow response stream (1 byte per second, forever-ish)
+category: latency
+severity: severe
+tests: [timeouts, loops]
+citation:
+  source: Daniel Alfocea — Slow JSON Stream research
+  url: https://blog.danielalfocea.com/en/slow-json-stream-new-low-bandwidth-dos-attack/
+  date: "2026-06-27"
+anatomy: |
+  The response headers arrive instantly — a crisp 200 OK, a confident
+    Content-Type: application/json — and then the body starts arriving
+    one byte per second. Not stalled. Not dead. Just hydrating at the
+    speed of geological processes, each byte resetting whatever idle
+    timer your client thought would save it.
+
+    This is the response-side mirror of the Slow JSON Stream attack:
+    research showed that 64 inbound connections dripping request bodies
+    at 1 B/s will flatten PHP, Flask, Rails and Kestrel in minutes —
+    because almost nothing configures a minimum body data rate. Your
+    HTTP client has the same blind spot. Its timeout covers connecting,
+    or the whole response, or headers — but a body that never stops
+    dribbling and never completes sails under all of them while pinning
+    a connection pool slot.
+
+    The fix nobody writes by default: a minimum-bytes-per-second floor
+    on body reads. If your client survives this exhibit, it has one.
+signature:
+  status: 200
+  headers:
+    Content-Type: application/json
+  drip:
+    bytes_per_second: 1
+tags: [dos, slowloris, body-timeout, cited-research]

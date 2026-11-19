@@ -1,0 +1,27 @@
+id: FD-2026-040
+slug: double-encoded-json
+title: Double-encoded JSON
+category: corruption
+severity: moderate
+tests: [parsing]
+anatomy: |
+  The body is a JSON string. Inside the string is JSON.
+    The first parse hands you a quoted blob; the second hands you the
+    actual object — the payload was serialized twice because someone
+    passed a dict through a template that had already been through a
+    serializer, like a letter sealed inside an envelope inside a second,
+    identical envelope addressed to the first envelope.
+
+    Signature move of APIs assembled entirely from other APIs, which is
+    to say, most of them. Somewhere in the chain, json.dumps() met a
+    payload that was already a string and simply did its job. The bug is
+    nobody's. It's everyone's. It's the architecture.
+
+    Clients that parse once and expect an object get a string and
+    explode. Clients that parse until they get an object survive but
+    must now answer the question "how many times is too many", which is
+    a philosophical position as much as a loop bound.
+signature:
+  status: 200
+  body: '"{\"user\": {\"id\": 12345, \"name\": \"ada\"}, \"ok\": true}"'
+tags: [json, encoding]

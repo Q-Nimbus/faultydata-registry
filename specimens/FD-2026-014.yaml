@@ -1,0 +1,27 @@
+id: FD-2026-014
+slug: latin1-as-utf8
+title: Encoding mismatch (claims UTF-8, sends Latin-1)
+category: corruption
+severity: moderate
+tests: [parsing]
+anatomy: |
+  The body is Latin-1. The header swears it's UTF-8. Every é, ñ, and
+    ü arrives as a mojibake piñata — "café" rendered "cafÃ©", which is
+    either a corrupted string or a very small insurance company.
+
+    Classic cause: a pipeline hop that transcoded the bytes but forgot to
+    update the label — the cargo was repackaged and nobody changed the
+    manifest. The bytes are self-consistent, the metadata is lying, and
+    your decoder trusts the metadata, so out comes the Ã's like a ransom
+    note assembled by a very tired linguist.
+
+    Clients that sniff or attempt a fallback decode survive. Clients that
+    trust Content-Type implicitly will faithfully store "SeÃ±or Data" in
+    your CRM, where it will remain until a customer writes in asking why
+    their name looks like it was translated into cat.
+signature:
+  status: 200
+  corrupt: encoding
+  headers:
+    Content-Type: application/json; charset=utf-8
+tags: [encoding, charset]

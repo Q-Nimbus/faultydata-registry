@@ -1,0 +1,23 @@
+id: FD-2026-106
+slug: array-not-object
+title: Top-level array where an object was promised
+category: corruption
+severity: moderate
+tests:
+- parsing
+- semantics
+tags:
+- json
+- schema
+- classic
+anatomy: "The docs said the response is an object. The response is a\n  JSON array. Both are \"valid JSON,\"\
+  \ both unmarshal without error into\n  their respective types, and only one of them is what your client\n\
+  \  declared in its structs. Strongly-typed clients die immediately;\n  JavaScript clients store the\
+  \ array, treat it as truthy, and render\n  [object Object] into someone's dashboard.\n\n  Ships in production\
+  \ every time someone \"fixes\" a search endpoint to\n  return multiple results and forgets the envelope.\
+  \ Schema validation\n  exists; this is the specimen that makes you use it."
+signature:
+  status: 200
+  headers:
+    Content-Type: application/json
+  body: '[{"id":1,"name":"the response is an array","docs_said":"object","unmarshal":"good luck"}]'

@@ -1,0 +1,29 @@
+id: FD-2026-094
+slug: southwest-scheduling-2022
+title: Stale crew-scheduling data melts operations (Southwest, Dec 2022)
+category: corruption
+severity: severe
+tests:
+- semantics
+- monitoring
+citation:
+  source: Wikipedia
+  url: https://en.wikipedia.org/wiki/2022_Southwest_Airlines_scheduling_crisis
+  date: '2022-12-26'
+tags:
+- real-world
+- stale-data
+- semantics
+anatomy: "A winter storm hit, flights cancelled, and Southwest's crew\n  scheduling systems — ancient\
+  \ by aviation standards, which is saying\n  something — could not track where anyone actually was. The\
+  \ systems kept\n  cheerfully returning data; the data was just confidently, operationally\n  wrong,\
+  \ and crews ended up phoning in manually to tell the airline where\n  they were standing. 16,700 flights\
+  \ cancelled.\n\n  The worst response an API can give isn't an error — it's a confident,\n  well-formed,\
+  \ stale answer. Everything 200s. Everything lies."
+signature:
+  status: 200
+  headers:
+    Content-Type: application/json
+    X-Data-Freshness: stale
+    Last-Modified: Mon, 19 Dec 2022 00:00:00 GMT
+  body: '{"flight":2982,"crew_assigned":"DEN","actual_crew_location":"a different state","schedule_version":"2022-12-19","confident":true}'

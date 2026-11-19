@@ -1,0 +1,27 @@
+id: FD-2026-015
+slug: utf8-bom
+title: UTF-8 BOM prefix
+category: corruption
+severity: trivial
+tests: [parsing]
+anatomy: |
+  Three invisible little bytes — EF BB BF — parked in front of your
+    JSON by a Windows-native toolchain that believes, with the serene
+    confidence of a man who has never met another encoding, that it's
+    doing you a favour. A byte order mark on a format that has one byte
+    order. It's like labelling left and right on a unicycle.
+
+    Most parsers meet the phantom characters and die loudly; Go's decoder
+    reports an "invalid character 'ï'" and leaves you googling a letter
+    your file does not visibly contain. You'll open the file in an editor
+    — nothing. Hex dump — there it is, grinning at you in position zero
+    like a cat that's knocked something off a shelf and is watching you
+    not notice.
+
+    The truly special cases are the parsers that half-tolerate it: fine
+    in dev, fatal in the library version pinned in production. The gift
+    that keeps on being undetectable in every diff.
+signature:
+  status: 200
+  corrupt: bom
+tags: [encoding, json, parser]

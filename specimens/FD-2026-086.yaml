@@ -1,0 +1,28 @@
+id: FD-2026-086
+slug: charset-utf16-lie
+title: charset=utf-16 lie on a UTF-8 body
+category: headers
+severity: moderate
+tests: [headers, parsing]
+anatomy: |
+  The Content-Type says charset=utf-16. The body is UTF-8. The
+  label and the bytes are in different encodings and the client
+  gets to decide which to believe — trust the header and decode
+  UTF-8 as UTF-16, which produces an elegant pile of CJK-adjacent
+  garbage, or sniff the bytes and ignore the declared metadata.
+
+  Different from FD-2026-014's Latin-1 gambit: there the header was
+  right about UTF-8 and the bytes were wrong. Here the header is
+  the lie and the bytes are honest — the manifest was stamped wrong
+  at the dock, not the cargo. Both are "encoding mismatch" the way
+  "fire" and "flood" are both "water damage".
+
+  Clients that sniff survive. Clients that obey the declared charset
+  decode a response that looks like it was written by a very
+  enthusiastic Unicode accident.
+signature:
+  status: 200
+  headers:
+    Content-Type: application/json; charset=utf-16
+  body: '{"id":12345,"name":"ada","note":"the bytes are honest UTF-8. the header is lying."}'
+tags: [encoding, headers, charset]

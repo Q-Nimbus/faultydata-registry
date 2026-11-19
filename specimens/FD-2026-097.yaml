@@ -1,0 +1,45 @@
+id: FD-2026-097
+slug: robinhood-outage-2020
+title: Trading halt by infrastructure (Robinhood, Mar 2020)
+category: composite
+severity: severe
+tests:
+- retry-logic
+- timeouts
+citation:
+  source: Wikipedia
+  url: https://en.wikipedia.org/wiki/Robinhood_Markets
+  date: '2020-03-02'
+tags:
+- real-world
+- capacity
+- trading
+anatomy: "Robinhood's systems fell over on Monday March 2nd 2020 — one of\n  the largest single-day rallies\
+  \ in Dow history — and again the next day\n  for good measure. Users watched a generational market move\
+  \ through an\n  app that could do nothing but return errors. The cause, per the\n  postmortem: infrastructure\
+  \ strain under record load, which is corporate\n  for \"success killed us too.\"\n\n  The signature\
+  \ is load-shaped: mostly 429s and 502s, occasional\n  long-delayed success, and the growing suspicion\
+  \ that retrying is making\n  everything worse for everyone including you."
+signature:
+  phases:
+  - weight: 50
+    signature:
+      status: 429
+      headers:
+        Retry-After: '30'
+      body: '{"detail":"rate limited"}'
+  - weight: 25
+    signature:
+      status: 502
+      body: bad gateway
+  - weight: 15
+    signature:
+      status: 200
+      delay:
+        ms: 4000
+        jitter_ms: 2000
+      body: '{"fills":[]}'
+  - weight: 10
+    signature:
+      status: 200
+      body: '{"fills":[]}'

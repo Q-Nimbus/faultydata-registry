@@ -1,0 +1,33 @@
+id: FD-2026-068
+slug: multistatus-207
+title: Batch partial success (HTTP 207 Multi-Status)
+category: status
+severity: moderate
+tests: [semantics, parsing]
+citation:
+  source: RFC 4918 — WebDAV, Multi-Status responses
+  url: https://www.rfc-editor.org/rfc/rfc4918
+anatomy: |
+  HTTP 207 — Multi-Status, WebDAV's contribution to the "success is
+  a spectrum" school of API design — means some of your operations
+  worked and some didn't, and the response contains a per-item
+  verdict because one status code couldn't handle the emotional
+  complexity. Batch APIs, bulk imports, and anything that does N
+  things when you asked for N things lives here.
+
+  The trap: clients that read the outer status see 207, file it
+  under "success-ish", and move on — while three of their ten items
+  404'd inside the body, unprocessed, unalerted, quietly missing
+  like the last items in a corporate goat-herding inventory. The
+  envelope lied by aggregation.
+
+  Correct behaviour: parse the envelope, iterate the per-item
+  statuses, treat partial failure as partial failure. Incorrect
+  behaviour: `if resp.ok`, which in a 207 world is optimism wearing
+  a boolean.
+signature:
+  status: 207
+  headers:
+    Content-Type: application/xml; charset=utf-8
+  body: '<?xml version="1.0"?><multistatus><response><href>/item/1</href><status>HTTP/1.1 200 OK</status></response><response><href>/item/2</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/item/3</href><status>HTTP/1.1 423 Locked</status></response></multistatus>'
+tags: [status, batch, webdav]

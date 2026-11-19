@@ -1,0 +1,32 @@
+id: FD-2026-031
+slug: atlassian-deleted-sites
+title: Multi-week partial outage (Atlassian, Apr 2022)
+category: composite
+severity: fatal
+tests: [semantics]
+citation:
+  source: Atlassian — April 2022 outage retrospective
+  url: https://www.atlassian.com/engineering/april-2022-outage-update
+  date: "2022-04-04"
+anatomy: |
+  A maintenance script, run with the wrong arguments,
+    deleted around four hundred customers' entire sites instead of
+    marking them for later — and the restore meant rebuilding each
+    tenant by hand, one at a time, over two weeks. Not hours. Weeks.
+    For a fortnight, affected companies' Jira answered every request
+    with a 404 while standups quietly relocated to a shared spreadsheet
+    and a prayer.
+
+    This is the outage genre's extended director's cut: not a bang but
+    a long, low hum of absence. No 500 with a retry hint, no degraded
+    mode, no read-only fallback — just the void where the project
+    management used to live, persisted at HTTP's most honest status
+    code for the duration of a small mortgage.
+
+    The specimen: a flat 404 with a body that suggests the site "may
+    have been deleted". May. There's always hope in the error message.
+    There was less in the calendar.
+signature:
+  status: 404
+  body: '{"error":"site not found","message":"This site may have been deleted or is temporarily unavailable"}'
+tags: [real-world, outage, data-loss]

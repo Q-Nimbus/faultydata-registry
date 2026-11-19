@@ -1,0 +1,32 @@
+id: FD-2026-010
+slug: cloudflare-522
+title: Gateway timeout from the edge (Cloudflare 522 pattern)
+category: status
+severity: severe
+tests: [parsing, semantics]
+citation:
+  source: Cloudflare support — troubleshooting error 522
+  url: https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-5xx-errors/error-522/
+anatomy: |
+  A Cloudflare 522: the edge made it to your origin, knocked politely,
+    and got nothing — connection timed out at the doorstep. The user gets
+    a branded HTML error page designed by a professional, for humans, with
+    a little illustration. Your API client gets the same thing, because
+    the edge does not know and cannot care that you're a robot.
+
+    So: HTTP 522, Content-Type text/html, a body full of friendly
+    troubleshooting advice aimed at a species that includes your PM but
+    not your parser. The API contract — JSON in, JSON out, or at least a
+    dignified status code — has been replaced by marketing collateral.
+
+    Clients that check Content-Type survive. Clients that blindly json.Parse
+    get a syntax error pointing at HTML, and someone will spend an hour
+    convinced your API "returned invalid JSON", which is technically true
+    in the way a fire is technically warm.
+signature:
+  status: 522
+  headers:
+    Content-Type: text/html
+    Server: cloudflare
+  body: '<!DOCTYPE html><html><body><h1>Error 522</h1><p>Connection timed out</p></body></html>'
+tags: [real-world, gateway, content-type]

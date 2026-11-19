@@ -1,0 +1,31 @@
+id: FD-2026-005
+slug: oauth-token-expiry
+title: Token expires mid-session (Entra ID pattern)
+category: status
+severity: moderate
+tests: [auth, retry-logic]
+citation:
+  source: Microsoft identity platform — access token lifetime
+  url: https://learn.microsoft.com/en-us/entra/identity-platform/access-tokens
+anatomy: |
+  OAuth tokens expire mid-session like milk with ambitions.
+    Your batch job has been happily authenticated for two hours, then —
+    401, invalid_token, you're nobody now. The API forgets you the way a
+    nightclub bouncer forgets you the instant you step outside for air: no
+    grudge, no ceremony, just a door that used to be open.
+
+    The correct response is refresh-then-retry-once. The incorrect response,
+    beloved of a thousand codebases and at least one bank, is retrying the
+    dead token in a tight loop until the rate limiter loses patience and
+    adds insult to authentication failure — at which point you get to enjoy
+    BOTH specimens.
+
+    Watch your client either do the right thing or spend eternity knocking
+    on a door that will never open again. Both outcomes are educational.
+    Only one of them is billable.
+signature:
+  status: 401
+  headers:
+    WWW-Authenticate: 'Bearer error="invalid_token", error_description="The access token expired"'
+  body: '{"error":{"code":"InvalidAuthenticationToken","message":"Access token has expired or is not yet valid."}}'
+tags: [auth, real-world, retryable]

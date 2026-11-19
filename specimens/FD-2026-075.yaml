@@ -1,0 +1,30 @@
+id: FD-2026-075
+slug: utf8-truncated
+title: UTF-8 truncated mid-codepoint
+category: corruption
+severity: moderate
+tests: [parsing]
+anatomy: |
+  The body ends mid-way through a multi-byte UTF-8 character — the
+  é that started as two bytes and arrived as one. The parser reaches
+  the end of the stream holding half a letter, the way a translator
+  faints mid-syllable. Not truncation at a field boundary; truncation
+  at an ATOM boundary, which is ruder.
+
+  This is what "the connection dropped" looks like at byte
+  granularity: not a clean cut but a tear through a codepoint.
+  Encoders that chunk without checking boundary safety produce this
+  constantly — every naive substring(0, N) applied to a UTF-8 string
+  produces it eventually, like a guillotine that occasionally only
+  nicks.
+
+  Clients that validate UTF-8 reject it cleanly. Clients that
+  decode-and-replace get the U+FFFD replacement character — the
+  little diamond of shame, �, appearing in your database where a
+  customer's name used to end. Clients that ignore encoding entirely
+  store the raw half-byte and pass the problem downstream, which is
+  the traditional approach.
+signature:
+  status: 200
+  corrupt: utf8-trunc
+tags: [encoding, utf-8, truncation]

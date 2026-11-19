@@ -1,0 +1,28 @@
+id: FD-2026-034
+slug: graphql-200-error
+title: HTTP 200 wrapping an error (GraphQL/SOAP pattern)
+category: corruption
+severity: moderate
+tests: [parsing, semantics]
+anatomy: |
+  HTTP 200. Transport: triumphant success. Payload:
+    complete failure. An error object smuggled inside a success envelope
+    — standard practice for GraphQL and SOAP, an unmarked landmine
+    everywhere else. The single most common lie in API-land and one of
+    the oldest: "the request succeeded" as a statement about the
+    request, not the result.
+
+    Clients that check the status code and move on report victory while
+    serving users an error dressed as data — the system logs say green,
+    the screen says broken, and someone gets paged about a failure that
+    "should be impossible" because HTTP said it was fine. HTTP was lied
+    to first. HTTP is innocent here. Mostly.
+
+    The errors array contains GRAPHQL_VALIDATION_FAILED, for flavour.
+    Your client either inspects the body's errors field or discovers,
+    eventually and at some cost, that "200" is just what the transport
+    thought of the journey, not the destination.
+signature:
+  status: 200
+  body: '{"errors":[{"message":"Field \u0027user\u0027 doesn\u0027t exist on type \u0027Query\u0027","extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}],"data":null}'
+tags: [graphql, status, semantic]

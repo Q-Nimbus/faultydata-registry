@@ -1,0 +1,31 @@
+id: FD-2026-058
+slug: csv-not-json
+title: CSV when JSON was expected
+category: corruption
+severity: moderate
+tests: [headers, parsing]
+anatomy: |
+  You asked for JSON; the endpoint returned CSV — because the
+  export flag defaulted, the format parameter silently fell through,
+  or a middleware translated the response into a spreadsheet because
+  somewhere in the architecture, a human being once said "can't it
+  just be Excel" and the infrastructure remembered.
+
+  The body is fine, technically: it's valid CSV, correctly delimited,
+  the data is all there. It's just in a different religion. Your
+  JSON parser will reject the leading header row with an error
+  mentioning a token that isn't in the file, and your data pipeline
+  will either ingest garbage or produce an error that points
+  absolutely nowhere near the actual problem.
+
+  This is the most common content-negotiation failure in the wild
+  and the most preventable: the Content-Type is right there saying
+  text/csv, and your client ignored it because it was expecting
+  JSON, which is the same error as the person who ordered a coffee
+  and drank the soup.
+signature:
+  status: 200
+  headers:
+    Content-Type: text/csv; charset=utf-8
+  body: "id,name,email\r\n1,ada,ada@example.com\r\n2,bo,bo@example.com\r\n"
+tags: [csv, content-type, parsing]

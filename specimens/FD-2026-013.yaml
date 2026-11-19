@@ -1,0 +1,26 @@
+id: FD-2026-013
+slug: wrong-types
+title: Wrong types in a valid envelope
+category: corruption
+severity: moderate
+tests: [parsing, semantics]
+anatomy: |
+  The schema said number. The wire sent a string. "id": "12345" —
+    same digits, different species, and your typed client just attempted
+    to stuff a word into an integer field with predictable consequences.
+
+    This happens constantly in the wild because the upstream was written
+    in a language where the difference between 42 and "42" is a theological
+    position rather than a type error. PHP's loose typing is the usual
+    suspect, but honestly any system that's ever passed a value through a
+    spreadsheet — the data pipeline equivalent of laundering money — is
+    capable of this.
+
+    Weakly-typed clients shrug and carry on, storing a string where a
+    number should be until something downstream tries to do arithmetic on
+    it. Strongly-typed clients die at the boundary, loudly, which is
+    ruder but considerably more honest.
+signature:
+  status: 200
+  corrupt: wrong-types
+tags: [json, types, schema-drift]

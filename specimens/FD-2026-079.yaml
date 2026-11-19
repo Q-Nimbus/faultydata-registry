@@ -1,0 +1,34 @@
+id: FD-2026-079
+slug: event-stream-npm
+title: Covert payload in a trusted package (event-stream, 2018)
+category: corruption
+severity: severe
+tests: [parsing, monitoring]
+citation:
+  source: npm blog / GitHub advisory — event-stream@3.3.6 flatmap-stream incident
+  url: https://github.com/advisories/GHSA-mh6f-8j2x-4483
+  date: "2018-11-26"
+anatomy: |
+  A new maintainer offered to help with event-stream — a package
+  downloaded two million times a week — was given commit access, and
+  quietly added a dependency containing an encrypted payload that
+  activated only inside one specific build (a Bitcoin wallet's,
+  naturally). Nobody noticed for two months because the malicious
+  code was shipped as a real, working, useful update. It wasn't a
+  saboteur breaking things; it was a saboteur maintaining things.
+
+  The specimen serves a package tarball-ish response that is valid,
+  useful, and contains an encrypted blob the comment swears is
+  "test data". Structurally fine. Semantically a sleeper agent.
+
+  This is the hardest class: the fault isn't a malformed artifact,
+  it's a well-formed artifact with intentions. Parsers can't help
+  you here — only review can, and review is the control everyone
+  skips because "it's a popular package". Exactly.
+signature:
+  status: 200
+  headers:
+    Content-Type: application/octet-stream
+    Content-Disposition: attachment; filename="flatmap-stream-0.1.1.tgz"
+  body: 'PK\x03\x04 — package contents — module.exports=doSomethingUseful; // test data: A75F2E9B0C4D1E3F (encrypted, definitely just test data)'
+tags: [real-world, supply-chain, npm]

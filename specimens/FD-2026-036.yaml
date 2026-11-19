@@ -1,0 +1,27 @@
+id: FD-2026-036
+slug: gzip-lie
+title: Content-Encoding lie (gzip header, plain body)
+category: corruption
+severity: moderate
+tests: [headers, parsing]
+anatomy: |
+  The headers swear the body is gzip; the body is, in fact, plaintext.
+    Some middlebox stripped the compression and left the label — the
+    courier removed the goods and kept the "FRAGILE" sticker, presumably
+    because the sticker was doing all the structural work anyway.
+
+    Clients that respect Content-Encoding feed plaintext into zlib and
+    get a decompression error that mentions nothing about the actual
+    crime, which is upstream and unaccountable as ever. Clients that
+    ignore headers entirely and sniff the bytes are accidentally correct —
+    a rare instance where doing less work is the right answer, which is
+    why it's so rarely tried.
+
+    Deceptively common in the wild: anywhere a proxy, a CDN, a service
+    mesh sidecar, or a well-meaning compression middleware has ever
+    touched a response. Which is to say, everywhere.
+signature:
+  status: 200
+  headers:
+    Content-Encoding: gzip
+tags: [encoding, compression]

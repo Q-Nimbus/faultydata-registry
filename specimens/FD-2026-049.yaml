@@ -1,0 +1,35 @@
+id: FD-2026-049
+slug: alb-504
+title: Load balancer gives up waiting (ALB/ELB 504)
+category: status
+severity: moderate
+tests: [timeouts, retry-logic]
+citation:
+  source: AWS docs — HTTP 504 Gateway Timeout from Classic/Application LBs
+  url: https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-troubleshooting.html
+anatomy: |
+  Your request reached the load balancer, the load balancer reached
+  your instance, and your instance took longer than sixty seconds to
+  respond — so the LB, who has seen this film before and knows how
+  it ends, cuts in with a 504 on the application's behalf. The
+  backend may still be computing. It doesn't matter. The verdict is
+  in.
+
+  The client-visible signature: a correct 504 arriving long after
+  the client expected anything, possibly long after the client's own
+  timeout fired — a response to a conversation the client already
+  left, like a waiter bringing dessert to a table that paid and left
+  in February.
+
+  Clients that assume "no response means no response" get surprised
+  when the 504 shows up at T+60s. Clients that gave up and retried
+  at T+10s have now submitted the request twice, which is how a slow
+  query becomes a slow query running twice. There's always a second
+  specimen hiding inside the first.
+signature:
+  status: 504
+  delay: { ms: 3000 }
+  headers:
+    Server: awselb/2.0
+  body: '<html><body><h1>504 Gateway Time-out</h1></body></html>'
+tags: [timeout, proxy, aws]

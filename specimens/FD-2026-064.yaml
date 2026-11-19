@@ -1,0 +1,36 @@
+id: FD-2026-064
+slug: faa-notam
+title: Corrupted database file grounds aviation (FAA NOTAM, Jan 2023)
+category: corruption
+severity: fatal
+tests: [parsing]
+citation:
+  source: FAA statement on NOTAM system outage (January 11, 2023)
+  url: https://www.faa.gov/newsroom/faa-statement-notam-system-outage
+  date: "2023-01-11"
+anatomy: |
+  A contractor synchronizing databases damaged a file, the NOTAM
+  system — the thing that tells pilots about closed runways and
+  hazards, so, load-bearing — refused to come up, and the FAA
+  grounded every departing flight in the United States for the first
+  time since a certain date in 2001. One file. All departures. The
+  backup failed too, because backups are load-bearing in theory and
+  decorative in practice.
+
+  The specimen serves a database-ish download that truncates
+  mid-record — the shape of "the file looks plausible until something
+  tries to read it, at which point the aviation industry pauses".
+  CrowdStrike proved the genre for kernels; the FAA proved it for
+  airspace.
+
+  If your pipeline ingests files without validating structure before
+  trusting contents, this specimen is your rehearsal. The pilots will
+  thank you. Eventually. Once they're airborne again.
+signature:
+  status: 200
+  headers:
+    Content-Type: application/octet-stream
+    Content-Disposition: attachment; filename="notam.db"
+  body: 'NOTAMDB\x00\x01\x02\x03HEADER-CORRUPT-RECORD-PARTIAL'
+  corrupt: truncate
+tags: [real-world, data-corruption, aviation]
