@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "com.faultydata/faultydata",
-  "description": "Public registry of cited, replayable HTTP failure signatures. List specimens modeled on real outages, get replay instructions, and run graded batteries against any HTTP client.",
+  "description": "Cited, replayable HTTP failure signatures — test any HTTP client against real outages.",
   "version": "1.0.0",
   "remotes": [
     {
